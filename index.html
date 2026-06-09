@@ -34,12 +34,23 @@
     <p class="note__tip">💡 教育局已大量採購的軟體（HiTeach、PaGamO、Padlet、Kahoot! 等）<b>免填</b>，系統會自動標示。</p>
   </section>
 
-  <!-- 老師姓名 -->
+  <!-- 老師資料 -->
   <section class="card namebar" id="namebar">
     <label class="namebar__label" for="teacherName">👩‍🏫 老師姓名（必填）</label>
     <input id="teacherName" class="namebar__input" type="text" placeholder="請輸入您的姓名" autocomplete="name" />
+
+    <div class="role-row">
+      <span class="role-row__label">職稱（必選）：</span>
+      <div class="role-opts" id="roleOpts"><!-- JS render --></div>
+    </div>
+
+    <div id="classPicker" class="classpicker" hidden>
+      <p class="classpicker__hint" id="classHint"></p>
+      <div class="classpicker__grid" id="classGrid"><!-- JS render --></div>
+    </div>
+
+    <p class="namebar__why">💡 班級數、教師數、學生數都由系統自動統計（同一班被導師＋科任重複需求只算一次），你只要勾選需要的軟體即可。</p>
     <div class="namebar__extra">
-      <input id="teacherGrade" class="namebar__small" type="text" placeholder="任教年級 / 領域（選填）" />
       <button id="loadMineBtn" class="btn btn--ghost" type="button">載入我先前填過的</button>
     </div>
     <p class="namebar__hint" id="nameHint"></p>
