@@ -170,6 +170,32 @@ b{font-weight:700}
 .rank__empty{color:var(--muted);text-align:center;padding:18px}
 .rank__mode{text-align:center;font-size:12px;color:var(--muted);margin-top:6px}
 
+/* admin: gate */
+.gate{position:fixed;inset:0;background:rgba(15,30,45,.55);display:grid;place-items:center;z-index:100;padding:16px}
+.gate__box{max-width:360px;width:100%;text-align:center}
+.gate__h{margin:0 0 14px;font-size:18px}
+.gate__note{font-size:12px;color:var(--muted);margin-top:10px}
+
+/* admin: stat grid */
+.stat-grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
+@media(min-width:680px){.stat-grid{grid-template-columns:repeat(4,1fr)}}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center;box-shadow:var(--shadow)}
+.stat__v{font-size:30px;font-weight:800;color:var(--brand)}
+.stat__v small{font-size:13px;font-weight:600;color:var(--muted);margin-left:3px}
+.stat__l{font-size:13px;color:var(--muted);margin-top:2px}
+
+/* admin: rank details */
+.adm-rank{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.adm-rank--top{border-color:var(--rank);box-shadow:0 0 0 1px var(--rank-l)}
+.adm-rank summary{display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer;list-style:none}
+.adm-rank summary::-webkit-details-marker{display:none}
+.adm-rank__body{padding:0 14px 12px;font-size:13px;color:var(--muted)}
+
+/* admin: teacher cards */
+.adm-teacher{padding:12px 14px;margin-bottom:8px}
+.adm-teacher__top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px}
+.adm-teacher__line{font-size:13.5px;margin:4px 0;line-height:1.6}
+
 /* footer */
 .site-credit{text-align:center;padding:30px 16px 40px;font-size:13px;color:rgba(0,0,0,.55);
   border-top:1px solid var(--line);margin-top:36px;background:#fff}
