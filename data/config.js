@@ -1,0 +1,51 @@
+/* ============================================================
+   石門國小 數位軟體需求調查 — 設定檔
+   ------------------------------------------------------------
+   目前為 DEMO 模式（資料存在本機瀏覽器 localStorage，可直接試用）。
+   等接上學校 Firebase 專案後：
+     1. 把 USE_FIREBASE 改成 true
+     2. 填入 firebaseConfig（金鑰可由 GitHub Actions 注入，沿用
+        __FIREBASE_xxx__ 佔位字串的 CI 流程）
+   ============================================================ */
+window.SURVEY_CONFIG = {
+  // ── 後端開關 ──
+  // 正式站由 GitHub Actions 注入金鑰後即為真實 Firebase；
+  // 本機預覽因金鑰仍是 __佔位__ 字串，會自動退回 DEMO（見 app.js 防呆）。
+  USE_FIREBASE: true,
+
+  // ── Firebase 專案設定（佔位，待填）──
+  firebaseConfig: {
+    apiKey:            "__FIREBASE_API_KEY__",
+    authDomain:        "__FIREBASE_AUTH_DOMAIN__",
+    projectId:         "__FIREBASE_PROJECT_ID__",
+    storageBucket:     "__FIREBASE_STORAGE_BUCKET__",
+    messagingSenderId: "__FIREBASE_MESSAGING_SENDER_ID__",
+    appId:             "__FIREBASE_APP_ID__"
+  },
+  collection: "submissions",      // Firestore 集合名稱
+
+  // ── 填報資訊 ──
+  formNo:    "1667",              // 教育局線上填報編號
+  docNo:     "桃教資字第1150051445號",
+  deadline:  "⏰ 校內填報截止：6/19（五）放學前",
+  deadlineOfficial: "教育局截止 6/25（四）17:00",
+
+  // ── 學校基本資料（核章 PDF 表單用）──
+  school: {
+    name:      "桃園市龍潭區石門國民小學",
+    shortName: "桃園市石門國小",
+    classesTotal: 32,   // 全校總班級數（含藝才/集中式特教）
+    classesNormal: 32,  // 普通班班級數
+    teachers: 65,       // 全校教師數
+    students: 800,      // 全校學生數
+    maxClassStudents: 28,
+    reporter: "黃凱揚／資訊組長",
+    phone: "03-4711752#210",
+    email: "h123263110@ms.tyc.edu.tw"
+  },
+
+  // ── 領域標籤（顯示順序）──
+  tagOrder: ["英語","國語文","本土語","數學","自然科學","社會","藝術",
+             "資訊程式","人工智慧","AR/VR","閱讀圖書","評量測驗",
+             "視訊遠距","影音多媒體","教學平臺工具","健康體育","幼兒學前","特教"]
+};

@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 需求調查填報（實名制、無登入）：開放讀取以顯示排行榜，
+    // 寫入加上形狀與長度驗證，避免被灌大量垃圾資料。
+    match /submissions/{id} {
+      allow read: if true;
+      allow create, update: if isValidSubmission(request.resource.data);
+      allow delete: if false;
+    }
+
+    function isValidSubmission(d) {
+      return d.keys().hasOnly(['name','grade','ts','tonggou','picks'])
+        && d.name is string && d.name.size() > 0 && d.name.size() <= 30
+        && d.ts is string
+        && d.picks is list && d.picks.size() <= 60
+        && d.tonggou is map;
+    }
+
+    // 其餘一律禁止
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

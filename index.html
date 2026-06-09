@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>數位內容與教學軟體需求調查｜桃園市龍潭區石門國民小學</title>
+<meta name="description" content="石門國小 115 年中小學數位學習實施計畫－教學軟體需求調查填報" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<!-- 頂部 -->
+<header class="hero">
+  <div class="hero__inner">
+    <p class="hero__school">桃園市龍潭區石門國民小學 · 鱻魚特色學園</p>
+    <h1 class="hero__title">115 年數位內容與教學軟體<br />需求調查填報</h1>
+    <p class="hero__sub">中小學數位學習實施計畫 · 線上填報編號 <b>1667</b></p>
+    <div class="hero__meta">
+      <span class="pill pill--warn" id="deadlinePill">⏰ 校內填報截止：6/24（一）放學前</span>
+      <span class="pill">📋 實名制 · 配發數作為明年度依據</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 步驟說明 -->
+  <section class="card note">
+    <h2 class="note__h">怎麼填？三步驟</h2>
+    <ol class="note__steps">
+      <li><b>填姓名</b>（實名制，方便彙整提報名單）</li>
+      <li><b>統購軟體</b>：3 套，填你預計使用的需求數（不用就填 0）</li>
+      <li><b>自主需求軟體</b>：勾選你想要的，全校會挑「需求最高前 5 名」提報教育局</li>
+    </ol>
+    <p class="note__tip">💡 教育局已大量採購的軟體（HiTeach、PaGamO、Padlet、Kahoot! 等）<b>免填</b>，系統會自動標示。</p>
+  </section>
+
+  <!-- 老師姓名 -->
+  <section class="card namebar" id="namebar">
+    <label class="namebar__label" for="teacherName">👩‍🏫 老師姓名（必填）</label>
+    <input id="teacherName" class="namebar__input" type="text" placeholder="請輸入您的姓名" autocomplete="name" />
+    <div class="namebar__extra">
+      <input id="teacherGrade" class="namebar__small" type="text" placeholder="任教年級 / 領域（選填）" />
+      <button id="loadMineBtn" class="btn btn--ghost" type="button">載入我先前填過的</button>
+    </div>
+    <p class="namebar__hint" id="nameHint"></p>
+  </section>
+
+  <!-- 區塊一：統購軟體 -->
+  <section class="block">
+    <div class="block__head">
+      <span class="block__tag block__tag--buy">統購軟體</span>
+      <h2 class="block__title">一、本局規劃統購之軟體（共 3 套）</h2>
+      <p class="block__desc">填「預計使用該軟體」的實際需求數，無需求填 0。實際配發將視本校數位學習推動成效另案審核。</p>
+    </div>
+    <div class="grid-buy" id="tonggouGrid"><!-- JS render --></div>
+  </section>
+
+  <!-- 區塊二：自主需求軟體 -->
+  <section class="block">
+    <div class="block__head">
+      <span class="block__tag block__tag--pick">自主需求軟體</span>
+      <h2 class="block__title">二、各校自主需求軟體（全校至多提報 5 項）</h2>
+      <p class="block__desc">從教育部「校園數位內容與教學軟體」選購名單挑選；勾選你需要的並填需求數。全校統計後取前 5 名提報。</p>
+    </div>
+
+    <!-- LoiLoNote 主打卡 -->
+    <div class="loilo" id="loiloCard"><!-- JS render --></div>
+
+    <!-- 篩選工具列 -->
+    <div class="toolbar card">
+      <div class="toolbar__row">
+        <input id="searchInput" class="toolbar__search" type="search" placeholder="🔍 搜尋軟體名稱或廠牌（例：英語、數學、MAKAR）" />
+        <select id="groupSelect" class="toolbar__select">
+          <option value="">全部組別</option>
+          <option value="1">數位內容</option>
+          <option value="2">課堂教學軟體</option>
+          <option value="3">遠距教學軟體</option>
+        </select>
+      </div>
+      <div class="chips" id="tagChips"><!-- JS render 領域 chips --></div>
+      <div class="toolbar__foot">
+        <label class="switch"><input type="checkbox" id="showExcluded" /> 顯示「已大量採購·免填」項目</label>
+        <span class="toolbar__count" id="resultCount"></span>
+      </div>
+    </div>
+
+    <!-- 結果清單 -->
+    <div id="resultsHint" class="results-hint">輸入關鍵字或點選上方領域 / 組別，開始挑選軟體 👆</div>
+    <ul class="results" id="results"></ul>
+    <button id="moreBtn" class="btn btn--more" type="button" hidden>載入更多 ↓</button>
+  </section>
+
+  <!-- 我的選擇 -->
+  <section class="block">
+    <div class="block__head">
+      <h2 class="block__title">三、確認我的需求</h2>
+      <p class="block__desc">以下是你目前勾選的內容，確認無誤後送出。</p>
+    </div>
+    <div class="card summary" id="summary"><!-- JS render --></div>
+    <button id="submitBtn" class="btn btn--submit" type="button">✅ 送出我的需求</button>
+    <p class="submit-msg" id="submitMsg"></p>
+  </section>
+
+  <!-- 即時排行榜 -->
+  <section class="block">
+    <div class="block__head">
+      <span class="block__tag block__tag--rank">即時排行</span>
+      <h2 class="block__title">📊 全校自主需求 前 5 名</h2>
+      <p class="block__desc">大家最想要的軟體（依勾選人數）。前 5 名就是學校會提報教育局的名單。</p>
+    </div>
+    <ol class="rank" id="rankList"><li class="rank__empty">尚無資料，快來成為第一個填報的老師！</li></ol>
+    <p class="rank__mode" id="rankMode"></p>
+  </section>
+
+</main>
+
+<!-- 頁尾署名 -->
+<footer class="site-credit">
+  <p class="site-credit__org">桃園市龍潭區石門國民小學 · 教務處</p>
+  <p class="site-credit__doc">依據 115 年「中小學數位學習實施計畫」· 桃教資字第1150051445號</p>
+  <p>
+    Made with <span class="site-credit__heart" aria-label="愛心">❤️</span> by
+    <a
+      href="https://www.smes.tyc.edu.tw/modules/tadnews/page.php?ncsn=11&nsn=16#a5"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="site-credit__author"
+    >阿凱老師</a>
+  </p>
+</footer>
+
+<script src="data/config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
