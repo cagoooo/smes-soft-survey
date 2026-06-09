@@ -13,18 +13,19 @@
   /* ── 三項統購軟體（區塊一）──────────────────────── */
   const TONGGOU = [
     { sn: "11111-031", name: "AILEAD365 線上教學平臺", brand: "力宇教育",
-      desc: "測評、影片、分析、診斷，小中高教學整合管理系統。", unit: "學生", key: "ailead" },
+      desc: "測評、影片、分析、診斷，小中高教學整合管理系統。", unit: "學生", key: "ailead", mode: "number" },
     { sn: "11311-180", name: "翰林雲端學院 TEAMS Lite", brand: "翰林雲端學院",
-      desc: "教師『派卷』+『派片』國中進度。", unit: "學生", key: "hanlin" },
+      desc: "教師『派卷』+『派片』國中進度。", unit: "學生", key: "hanlin", mode: "number" },
+    // ClassSwift 以「教師數」計：每位老師就是 1 人，改用勾選，教師數由後台統計人頭。
     { sn: "11212-107", name: "ClassSwift 課堂互動軟體", brand: "ViewSonic Education",
-      desc: "課堂即時互動、提問、計分搶答。", unit: "教師", key: "classswift" }
+      desc: "課堂即時互動、提問、計分搶答。", unit: "教師", key: "classswift", mode: "check" }
   ];
 
   /* ── 狀態 ──────────────────────────────────────── */
   let CATALOG = [];           // 全部品項
   let POOL = [];              // 自主可選池（排除統購）
   let SNMAP = {};             // sn -> item
-  const picks = new Map();    // sn -> {classes,teachers,students}
+  const picks = new Map();    // sn -> {classes,students}（教師數＝1，由後台統計人頭）
   const buy = { ailead: 0, hanlin: 0, classswift: 0 };
   let activeTag = "";
   let shown = 0;
@@ -76,16 +77,23 @@
     g.innerHTML = "";
     TONGGOU.forEach((t) => {
       const card = el("div", "buy");
+      const control = (t.mode === "check")
+        ? `<p class="buy__unit">需求教師數（系統自動統計人頭）</p>
+           <label class="buy__check">
+             <input type="checkbox" data-buycheck="${t.key}" aria-label="我需要 ${esc(t.name)}" />
+             <span>我需要這套（＝1 位教師）</span>
+           </label>`
+        : `<p class="buy__unit">需求${t.unit}數</p>
+           <div class="buy__num">
+             <button class="stepper" data-step="-1" data-key="${t.key}" type="button">−</button>
+             <input type="number" min="0" inputmode="numeric" value="0" data-buy="${t.key}" aria-label="${esc(t.name)} 需求${t.unit}數" />
+             <button class="stepper" data-step="1" data-key="${t.key}" type="button">＋</button>
+           </div>`;
       card.innerHTML =
         `<p class="buy__name">${esc(t.name)}</p>
          <p class="buy__brand">${esc(t.brand)} · 序號 ${t.sn}</p>
          <p class="buy__desc">${esc(t.desc)}</p>
-         <p class="buy__unit">需求${t.unit}數</p>
-         <div class="buy__num">
-           <button class="stepper" data-step="-1" data-key="${t.key}" type="button">−</button>
-           <input type="number" min="0" inputmode="numeric" value="0" data-buy="${t.key}" aria-label="${esc(t.name)} 需求數" />
-           <button class="stepper" data-step="1" data-key="${t.key}" type="button">＋</button>
-         </div>`;
+         ${control}`;
       g.appendChild(card);
     });
   }
@@ -128,14 +136,16 @@
     });
   }
 
-  /* ── 數字輸入欄（自主）────────────────────────── */
+  /* ── 數字輸入欄（自主）──────────────────────────
+     不含「教師數」：每位老師就是自己 1 人，教師數由後台統計填報人數。 */
   function numInputs(sn) {
     const p = picks.get(sn) || {};
     const f = (k, label) =>
       `<label class="numbox">${label}
          <input type="number" min="0" inputmode="numeric" data-num="${k}" data-sn="${sn}" value="${p[k] || ""}" placeholder="0" />
        </label>`;
-    return f("classes", "班級數") + f("teachers", "教師數") + f("students", "學生數");
+    return f("classes", "班級數") + f("students", "學生數")
+      + `<span class="numbox numbox--note">教師數＝1（系統統計）</span>`;
   }
 
   /* ── 篩選 ──────────────────────────────────────── */
@@ -191,7 +201,7 @@
   function toggle(sn, checked) {
     const c = SNMAP[sn];
     if (!c || c.excluded) return;
-    if (checked) { if (!picks.has(sn)) picks.set(sn, { classes: "", teachers: "", students: "" }); }
+    if (checked) { if (!picks.has(sn)) picks.set(sn, { classes: "", students: "" }); }
     else picks.delete(sn);
     // 局部更新 LoiLoNote 卡
     if (sn === "11112-045") renderLoilo();
@@ -219,10 +229,10 @@
   function renderSummary() {
     const box = $("#summary");
     const buyRows = TONGGOU.filter((t) => buy[t.key] > 0)
-      .map((t) => row(`${t.name}`, `${buy[t.key]} ${t.unit}`, null));
+      .map((t) => row(`${t.name}`, t.mode === "check" ? "需要" : `${buy[t.key]} ${t.unit}`, null));
     const pickRows = [...picks.keys()].map((sn) => {
       const c = SNMAP[sn], p = picks.get(sn);
-      const nums = [p.classes && `${p.classes}班`, p.teachers && `${p.teachers}師`, p.students && `${p.students}生`]
+      const nums = [p.classes && `${p.classes}班`, p.students && `${p.students}生`]
         .filter(Boolean).join("・") || "需求數待填";
       return row(c.name, nums, sn);
     });
@@ -254,7 +264,7 @@
       tonggou: { ailead: buy.ailead, hanlin: buy.hanlin, classswift: buy.classswift },
       picks: [...picks.keys()].map((sn) => {
         const c = SNMAP[sn], p = picks.get(sn);
-        return { sn, name: c.name, group: c.group, classes: +p.classes || 0, teachers: +p.teachers || 0, students: +p.students || 0 };
+        return { sn, name: c.name, group: c.group, classes: +p.classes || 0, students: +p.students || 0 };
       })
     };
 
@@ -298,9 +308,12 @@
     if (!rec) { hint.textContent = "找不到先前的紀錄（或尚未填過）。"; return; }
     // 還原
     buy.ailead = rec.tonggou.ailead || 0; buy.hanlin = rec.tonggou.hanlin || 0; buy.classswift = rec.tonggou.classswift || 0;
-    TONGGOU.forEach((t) => { const inp = document.querySelector(`[data-buy="${t.key}"]`); if (inp) inp.value = buy[t.key]; });
+    TONGGOU.forEach((t) => {
+      if (t.mode === "check") { const cb = document.querySelector(`[data-buycheck="${t.key}"]`); if (cb) cb.checked = buy[t.key] > 0; }
+      else { const inp = document.querySelector(`[data-buy="${t.key}"]`); if (inp) inp.value = buy[t.key]; }
+    });
     picks.clear();
-    (rec.picks || []).forEach((p) => picks.set(p.sn, { classes: p.classes || "", teachers: p.teachers || "", students: p.students || "" }));
+    (rec.picks || []).forEach((p) => picks.set(p.sn, { classes: p.classes || "", students: p.students || "" }));
     if (rec.grade) $("#teacherGrade").value = rec.grade;
     renderLoilo(); renderResults(true); renderSummary();
     hint.textContent = `已載入 ${name} 老師先前填的內容，可直接修改後再送出。`;
@@ -351,6 +364,11 @@
     $("#tonggouGrid").addEventListener("input", (e) => {
       const inp = e.target.closest("[data-buy]"); if (!inp) return;
       let v = inp.value.replace(/[^0-9]/g, ""); inp.value = v; buy[inp.dataset.buy] = +v || 0; renderSummary();
+    });
+    // 統購：ClassSwift 等「教師數」品項用勾選（＝1，後台統計人頭）
+    $("#tonggouGrid").addEventListener("change", (e) => {
+      const cb = e.target.closest("[data-buycheck]"); if (!cb) return;
+      buy[cb.dataset.buycheck] = cb.checked ? 1 : 0; renderSummary();
     });
 
     // 搜尋 / 篩選
