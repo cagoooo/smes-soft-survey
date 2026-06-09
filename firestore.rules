@@ -11,8 +11,10 @@ service cloud.firestore {
     }
 
     function isValidSubmission(d) {
-      return d.keys().hasOnly(['name','grade','ts','tonggou','picks'])
+      return d.keys().hasOnly(['name','role','classes','ts','tonggou','picks'])
         && d.name is string && d.name.size() > 0 && d.name.size() <= 30
+        && d.role is string && d.role.size() <= 12
+        && d.classes is list && d.classes.size() <= 40
         && d.ts is string
         && d.picks is list && d.picks.size() <= 60
         && d.tonggou is map;
