@@ -446,16 +446,18 @@ body{ font-size:17px; }
 
 /* 置頂老師資料列：捲動時收合成一行（只留姓名＋狀態），不占畫面 */
 .namebar{ transition:padding .15s; }
-.namebar--compact{ display:flex; align-items:center; gap:10px; padding:8px 14px !important; }
+.namebar--compact{ display:flex; align-items:center; gap:8px 10px; flex-wrap:wrap; padding:8px 14px !important; }
 .namebar--compact .namebar__label,
-.namebar--compact .role-row,
 .namebar--compact #classPicker,
 .namebar--compact .namebar__why,
 .namebar--compact .namebar__hint,
 .namebar--compact #loadMineBtn{ display:none !important; }
-.namebar--compact .namebar__input{ flex:1; margin:0; font-size:16px; padding:9px 12px; }
+.namebar--compact .namebar__input{ flex:1 1 180px; margin:0; font-size:16px; padding:9px 12px; }
+.namebar--compact .role-row{ margin:0; gap:6px; }
+.namebar--compact .role-row__label{ display:none; }   /* 收合時省空間，只留職稱鈕 */
+.namebar--compact .role-btn{ padding:8px 14px; font-size:14.5px; min-height:0; }
 .namebar--compact .namebar__extra{ margin:0; flex-shrink:0; }
-.namebar--compact::before{ content:"✏️"; font-size:18px; }
+.namebar--compact::before{ content:"✏️"; font-size:18px; flex-shrink:0; }
 
 /* 領域大卡入口 */
 .domain-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin:4px 0 12px; flex-wrap:wrap; }
