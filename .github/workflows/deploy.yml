@@ -36,6 +36,13 @@ jobs:
           if grep -q '"__FIREBASE_' "$f"; then echo "❌ 仍有未注入的佔位字串"; exit 1; fi
           echo "✅ Firebase 設定已注入"
 
+      - name: Cache-bust 資產版本（JS/CSS）
+        run: |
+          set -e
+          V="${{ github.sha }}"
+          sed -i "s/__VER__/$V/g" index.html admin.html official.html
+          echo "✅ 資產版本號 = $V"
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
