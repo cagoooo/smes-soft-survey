@@ -26,6 +26,15 @@
   /* ── 班級清單 ── */
   const CLASSES = (CFG.classGroups || []).flatMap((g) => g.classes.map((c) => ({ id: g.grade + c, grade: g.grade, label: c })));
   const ROLES = ["導師", "科任", "行政／其他"];
+  const clsLabel = (id) => { const c = CLASSES.find((x) => x.id === id); return c ? c.grade + c.label : id; };
+
+  /* ── 操作回饋 toast ── */
+  function showToast(msg) {
+    let t = $("#toast");
+    if (!t) { t = el("div", "toast"); t.id = "toast"; document.body.appendChild(t); }
+    t.textContent = msg; t.classList.add("toast--show");
+    clearTimeout(showToast._t); showToast._t = setTimeout(() => t.classList.remove("toast--show"), 2400);
+  }
 
   /* ── 狀態 ── */
   let CATALOG = [], POOL = [], SNMAP = {};
@@ -134,13 +143,20 @@
         ${byGrade[g].map((c) => `<button class="cp__chip ${myClasses.has(c.id) ? "cp__chip--on" : ""}" data-cid="${c.id}" type="button">${esc(c.label)}</button>`).join("")}
        </div>`).join("");
   }
+  function updateDoneBtn() {
+    $("#classDone").textContent = (role === "科任" && myClasses.size) ? `完成（已選 ${myClasses.size} 班）` : "完成";
+  }
   function openClassModal() {
     $("#classModalTitle").textContent = role === "導師" ? "請選擇你帶的班級" : "請選擇你任教的班級";
     $("#classModalHint").textContent = role === "導師" ? "導師只能選 1 班（點一下即完成）" : "可多選：點選你任教的每個班，選完按「完成」";
-    renderClassGrid();
+    renderClassGrid(); updateDoneBtn();
     $("#classModal").hidden = false;
   }
-  function closeClassModal() { $("#classModal").hidden = true; updateMyClassesLine(); renderSummary(); }
+  function closeClassModal() {
+    $("#classModal").hidden = true;
+    updateMyClassesLine(); renderSummary();
+    if (myClasses.size) showToast(`✅ 已選班級：${[...myClasses].map(clsLabel).join("、")}`);
+  }
   function toggleClass(cid) {
     if (role === "導師") {
       const had = myClasses.has(cid);
@@ -150,18 +166,17 @@
       if (myClasses.has(cid)) myClasses.delete(cid); else myClasses.add(cid);
     }
     [...$("#classGrid").querySelectorAll(".cp__chip")].forEach((b) => b.classList.toggle("cp__chip--on", myClasses.has(b.dataset.cid)));
-    updateMyClassesLine();
-    if (role === "導師" && myClasses.size === 1) closeClassModal();   // 導師選 1 班即完成
+    updateMyClassesLine(); updateDoneBtn();
+    if (role === "導師" && myClasses.size === 1) closeClassModal();   // 導師選 1 班即完成（closeClassModal 會 toast）
   }
-  // namebar 顯示已選班級 + 重選
+  // namebar 顯示已選班級 + 重選（收合時也會顯示，作為回饋）
   function updateMyClassesLine() {
     const line = $("#myClassesLine");
     if (!role || role === "行政／其他") { line.hidden = true; line.innerHTML = ""; return; }
     line.hidden = false;
-    const idLabel = (id) => { const c = CLASSES.find((x) => x.id === id); return c ? c.grade + c.label : id; };
     line.innerHTML = myClasses.size
-      ? `任教班級：${[...myClasses].map((i) => `<b>${esc(idLabel(i))}</b>`).join("、")} <button class="link-btn" id="editClasses" type="button">✏️ 重選</button>`
-      : `<button class="link-btn link-btn--warn" id="editClasses" type="button">⚠️ 請點此選擇你的班級</button>`;
+      ? `📍 任教班級：${[...myClasses].map((i) => `<b>${esc(clsLabel(i))}</b>`).join("、")} <button class="link-btn" id="editClasses" type="button">✏️ 重選</button>`
+      : `<button class="link-btn link-btn--warn" id="editClasses" type="button">⚠️ 尚未選班級，請點此選擇</button>`;
   }
 
   /* ── 區塊一：統購（全部勾選制）── */

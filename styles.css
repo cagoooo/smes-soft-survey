@@ -448,10 +448,11 @@ body{ font-size:17px; }
 .namebar{ transition:padding .15s; }
 .namebar--compact{ display:flex; align-items:center; gap:8px 10px; flex-wrap:wrap; padding:8px 14px !important; }
 .namebar--compact .namebar__label,
-.namebar--compact #myClassesLine,
 .namebar--compact .namebar__why,
 .namebar--compact .namebar__hint,
 .namebar--compact #loadMineBtn{ display:none !important; }
+/* 收合時仍顯示「任教班級」回饋，整行排在第二列 */
+.namebar--compact #myClassesLine{ flex-basis:100%; margin:2px 0 0; font-size:13.5px; order:9; }
 .namebar--compact .namebar__input{ flex:1 1 200px; max-width:460px; margin:0; font-size:16px; padding:9px 12px; }
 .namebar--compact .role-row{ margin:0; gap:6px; }
 .namebar--compact .role-row__label{ display:none; }   /* 收合時省空間，只留職稱鈕 */
@@ -470,6 +471,13 @@ body{ font-size:17px; }
 .modal{ position:fixed; inset:0; background:rgba(15,30,45,.5); z-index:200;
   display:flex; align-items:center; justify-content:center; padding:16px; }
 .modal[hidden]{ display:none; }   /* 修正：class 的 display 會蓋過 hidden 屬性 */
+
+/* 操作回饋 toast */
+.toast{ position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(20px);
+  background:var(--brand-d); color:#fff; padding:13px 24px; border-radius:999px;
+  font-weight:700; font-size:15.5px; box-shadow:0 6px 20px rgba(0,0,0,.28);
+  opacity:0; pointer-events:none; transition:.25s; z-index:300; max-width:90vw; text-align:center; }
+.toast--show{ opacity:1; transform:translateX(-50%) translateY(0); }
 .modal__box{ max-width:560px; width:100%; max-height:86vh; overflow:auto; }
 .modal__t{ margin:0 0 4px; font-size:20px; font-weight:800; }
 .modal__hint{ margin:0 0 14px; font-size:14px; color:var(--muted); }
