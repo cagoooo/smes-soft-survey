@@ -16,6 +16,7 @@
     <p class="hero__sub">中小學數位學習實施計畫 · 線上填報編號 <b>1667</b></p>
     <div class="hero__meta">
       <span class="pill pill--warn" id="deadlinePill">⏰ 校內填報截止：6/24（一）放學前</span>
+      <span class="pill" id="countdownPill"></span>
       <span class="pill">📋 實名制 · 配發數作為明年度依據</span>
     </div>
     <div class="fontscale" id="fontScale" role="group" aria-label="字級調整">
@@ -84,6 +85,13 @@
     <!-- LoiLoNote 主打卡 -->
     <div class="loilo" id="loiloCard"><!-- JS render --></div>
 
+    <!-- 依領域一鍵瀏覽（大卡入口）-->
+    <div class="domain-head">
+      <h3 class="domain-head__t">📂 依領域快速瀏覽</h3>
+      <button id="clearDomain" class="btn btn--ghost" type="button" hidden>✕ 清除領域</button>
+    </div>
+    <div class="domain-grid" id="domainGrid"><!-- JS render --></div>
+
     <!-- 篩選工具列 -->
     <div class="toolbar card">
       <div class="toolbar__row">
@@ -95,7 +103,6 @@
           <option value="3">遠距教學軟體</option>
         </select>
       </div>
-      <div class="chips" id="tagChips"><!-- JS render 領域 chips --></div>
       <div class="toolbar__foot">
         <label class="switch"><input type="checkbox" id="showExcluded" /> 顯示「已大量採購·免填」項目</label>
         <span class="toolbar__count" id="resultCount"></span>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>核章 PDF · 官方表格｜石門國小數位軟體調查</title>
+<link rel="stylesheet" href="styles.css" />
+<style>
+  /* 官方表格（A4 列印）*/
+  .of-wrap{max-width:900px;margin:0 auto;padding:20px 16px 60px}
+  .of-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0;
+    background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
+  .of-tools input{padding:9px 12px;font-size:15px;border:1px solid var(--line);border-radius:8px}
+  .of-doc{background:#fff;border:1px solid var(--line);border-radius:8px;padding:28px 30px;
+    box-shadow:var(--shadow);color:#000}
+  .of-doc h1{text-align:center;font-size:20px;margin:0 0 4px}
+  .of-doc h2{font-size:15px;margin:18px 0 8px}
+  .of-sub{text-align:center;font-size:13px;color:#444;margin:0 0 16px}
+  table.of{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:8px}
+  table.of th,table.of td{border:1px solid #555;padding:6px 8px;text-align:center}
+  table.of th{background:#eef2f7}
+  table.of td.l{text-align:left}
+  .of-meeting{font-size:13.5px;margin:10px 0 4px}
+  .of-sign{display:flex;justify-content:space-between;margin-top:34px;font-size:13.5px}
+  .of-sign div{text-align:center}
+  .of-sign .line{margin-top:40px;border-top:1px solid #555;padding-top:4px;min-width:120px}
+  @media print{
+    .no-print{display:none !important}
+    body{background:#fff}
+    .of-wrap{max-width:none;padding:0}
+    .of-doc{border:none;box-shadow:none;padding:0}
+    @page{size:A4;margin:14mm}
+  }
+</style>
+</head>
+<body>
+<header class="hero no-print">
+  <div class="hero__inner">
+    <p class="hero__school">桃園市龍潭區石門國民小學 · 教務處</p>
+    <h1 class="hero__title" style="font-size:24px">🖨️ 核章 PDF · 官方表格</h1>
+    <p class="hero__sub">系統自動彙整 → 列印或存成 PDF → 核章掃描上傳編號 1667</p>
+  </div>
+</header>
+
+<!-- 密碼閘 -->
+<div id="gate" class="gate">
+  <div class="gate__box card">
+    <h2 class="gate__h">🔒 請輸入管理密碼</h2>
+    <input id="gateInput" class="namebar__input" type="password" placeholder="管理密碼" />
+    <button id="gateBtn" class="btn btn--submit" type="button" style="margin-top:12px">進入</button>
+    <p id="gateMsg" class="submit-msg"></p>
+  </div>
+</div>
+
+<div class="of-wrap" id="panel" hidden>
+  <div class="of-tools no-print">
+    <span id="ofMode" class="toolbar__count"></span>
+    <label>會議日期：<input id="meetDate" type="text" placeholder="例：115年6月18日" /></label>
+    <label>會議名稱：<input id="meetName" type="text" placeholder="例：教師晨會" /></label>
+    <button id="printBtn" class="btn btn--submit" type="button" style="width:auto;padding:12px 22px">🖨️ 列印 / 存成 PDF</button>
+    <button id="refreshBtn" class="btn btn--ghost" type="button">🔄 重新整理</button>
+  </div>
+  <div class="of-doc" id="ofDoc"><!-- JS render --></div>
+</div>
+
+<script src="data/config.js"></script>
+<script src="official.js"></script>
+</body>
+</html>

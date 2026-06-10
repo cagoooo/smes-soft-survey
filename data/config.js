@@ -27,6 +27,9 @@ window.SURVEY_CONFIG = {
   docNo:     "桃教資字第1150051445號",
   deadline:  "⏰ 校內填報截止：6/19（五）放學前",
   deadlineOfficial: "教育局截止 6/25（四）17:00",
+  deadlineDate: "2026-06-19T16:00:00+08:00",   // 校內截止精確時間（倒數計時用）
+  meetingName: "",                              // 正式會議名稱（核章 PDF 用，可後台填）
+  meetingDate: "",                              // 正式會議日期
 
   // ── 學校基本資料（核章 PDF 表單用）──
   school: {

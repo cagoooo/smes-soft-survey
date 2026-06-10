@@ -220,6 +220,19 @@ b{font-weight:700}
 .adm-rank summary::-webkit-details-marker{display:none}
 .adm-rank__body{padding:0 14px 12px;font-size:13px;color:var(--muted)}
 
+/* admin: charts */
+.chart-grid{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:760px){.chart-grid{grid-template-columns:1fr 1fr}}
+.chart__t{margin:0 0 12px;font-size:15px;font-weight:800}
+.bar{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13.5px}
+.bar__l{width:88px;flex-shrink:0;text-align:right;color:var(--ink)}
+.bar__track{flex:1;background:#f1f5f9;border-radius:6px;height:18px;overflow:hidden}
+.bar__fill{display:block;height:100%;border-radius:6px;min-width:2px;transition:width .3s}
+.bar__v{width:38px;text-align:right;font-weight:700;color:var(--muted)}
+.pie{width:150px;height:150px;border-radius:50%;margin:4px auto 12px}
+.pie__legend{display:flex;flex-direction:column;gap:5px;font-size:13.5px}
+.pie__legend i{display:inline-block;width:13px;height:13px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+
 /* admin: teacher cards */
 .adm-teacher{padding:12px 14px;margin-bottom:8px}
 .adm-teacher__top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px}
@@ -430,3 +443,20 @@ body{ font-size:17px; }
 /* 免填說明 */
 .excluded-note{ font-size:13px; color:var(--warn); background:#fffbeb;
   border:1px solid #fde68a; border-radius:8px; padding:8px 11px; margin-top:10px; }
+
+/* 領域大卡入口 */
+.domain-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin:4px 0 12px; flex-wrap:wrap; }
+.domain-head__t{ margin:0; font-size:18px; font-weight:800; }
+.domain-grid{ display:grid; gap:10px; grid-template-columns:repeat(2,1fr); margin-bottom:16px; }
+@media(min-width:560px){ .domain-grid{ grid-template-columns:repeat(3,1fr); } }
+@media(min-width:900px){ .domain-grid{ grid-template-columns:repeat(6,1fr); } }
+.domain-card{ display:flex; flex-direction:column; align-items:center; gap:4px;
+  background:var(--card); border:1.5px solid var(--line); border-radius:14px;
+  padding:14px 8px; cursor:pointer; font-family:inherit; transition:.12s; box-shadow:var(--shadow); }
+.domain-card:hover{ border-color:var(--pick); transform:translateY(-2px); }
+.domain-card--on{ background:var(--pick); border-color:var(--pick); color:#fff; }
+.domain-card__ic{ font-size:30px; line-height:1; }
+.domain-card__name{ font-size:15px; font-weight:700; }
+.domain-card__n{ font-size:12.5px; opacity:.7; }
+.domain-card--on .domain-card__n{ opacity:.9; }
+@media(min-width:1024px){ .domain-card__ic{ font-size:34px; } .domain-card__name{ font-size:16.5px; } }

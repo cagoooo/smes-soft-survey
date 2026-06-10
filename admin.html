@@ -35,6 +35,8 @@
       <button id="refreshBtn" class="btn btn--ghost" type="button">🔄 重新整理</button>
       <button id="csvSoft" class="btn btn--ghost" type="button">⬇️ 軟體彙總 CSV</button>
       <button id="csvTeacher" class="btn btn--ghost" type="button">⬇️ 老師明細 CSV</button>
+      <button id="csvOfficial" class="btn btn--ghost" type="button">📑 官方表單格式 CSV</button>
+      <a href="official.html" class="btn btn--ghost" style="text-decoration:none">🖨️ 核章 PDF（官方表格）</a>
     </div>
   </div>
 
@@ -50,6 +52,20 @@
       <h2 class="block__title">統購 3 套 · 需求數加總</h2>
     </div>
     <div class="card" id="tonggouStat"></div>
+  </section>
+
+  <!-- 統計圖表 -->
+  <section class="block">
+    <div class="block__head">
+      <span class="block__tag block__tag--rank">統計圖表</span>
+      <h2 class="block__title">📊 需求分布圖</h2>
+    </div>
+    <div class="chart-grid">
+      <div class="card"><h3 class="chart__t">依組別（自主需求人次）</h3><div id="chartGroup"></div></div>
+      <div class="card"><h3 class="chart__t">依領域（自主需求人次）</h3><div id="chartDomain"></div></div>
+      <div class="card"><h3 class="chart__t">依年級（有需求的班級數）</h3><div id="chartGrade"></div></div>
+      <div class="card"><h3 class="chart__t">每日填報數</h3><div id="chartDay"></div></div>
+    </div>
   </section>
 
   <!-- 自主排行（全部，前5標記） -->

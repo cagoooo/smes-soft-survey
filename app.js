@@ -103,7 +103,8 @@
     CATALOG.forEach((c) => { SNMAP[c.sn] = c; });
     POOL = CATALOG.filter((c) => !c.tonggou);
     renderLoilo();
-    renderChips();
+    renderDomains();
+    startCountdown();
     bindEvents();
     await initFirebase();
     renderRank();
@@ -191,11 +192,35 @@
   }
 
   /* ── 領域 chips ── */
-  function renderChips() {
-    const box = $("#tagChips"), counts = {};
+  const DOMAIN_ICON = {
+    "英語": "🔤", "國語文": "📖", "本土語": "🗣️", "數學": "🔢", "自然科學": "🔬",
+    "社會": "🌏", "藝術": "🎨", "資訊程式": "💻", "人工智慧": "🤖", "AR/VR": "🥽",
+    "閱讀圖書": "📚", "評量測驗": "📝", "視訊遠距": "📹", "影音多媒體": "🎬",
+    "教學平臺工具": "🧰", "健康體育": "⚽", "幼兒學前": "🧸", "特教": "🤝"
+  };
+  function renderDomains() {
+    const box = $("#domainGrid"), counts = {};
     POOL.forEach((c) => { if (!c.excluded) c.tags.forEach((t) => counts[t] = (counts[t] || 0) + 1); });
-    box.innerHTML = (CFG.tagOrder || []).filter((t) => counts[t])
-      .map((t) => `<button class="chip" data-tag="${esc(t)}" type="button">${esc(t)}<span class="chip__n">${counts[t]}</span></button>`).join("");
+    box.innerHTML = (CFG.tagOrder || []).filter((t) => counts[t]).map((t) =>
+      `<button class="domain-card ${activeTag === t ? "domain-card--on" : ""}" data-tag="${esc(t)}" type="button">
+         <span class="domain-card__ic">${DOMAIN_ICON[t] || "📦"}</span>
+         <span class="domain-card__name">${esc(t)}</span>
+         <span class="domain-card__n">${counts[t]} 套</span>
+       </button>`).join("");
+    $("#clearDomain").hidden = !activeTag;
+  }
+
+  /* ── 截止倒數 ── */
+  function startCountdown() {
+    const pill = $("#countdownPill"); if (!pill || !CFG.deadlineDate) return;
+    const tick = () => {
+      const diff = new Date(CFG.deadlineDate).getTime() - Date.now();
+      if (isNaN(diff)) { pill.hidden = true; return; }
+      if (diff <= 0) { pill.textContent = "⏳ 校內填報已截止"; return; }
+      const d = Math.floor(diff / 86400000), h = Math.floor(diff % 86400000 / 3600000), m = Math.floor(diff % 3600000 / 60000);
+      pill.textContent = d > 0 ? `⏳ 距校內截止剩 ${d} 天 ${h} 小時` : `⏳ 距校內截止剩 ${h} 小時 ${m} 分`;
+    };
+    tick(); setInterval(tick, 60000);
   }
   // 「了解這套」Google 查詢連結
   function infoLink(name, brand, cls) {
@@ -370,12 +395,14 @@
     $("#groupSelect").addEventListener("change", () => renderResults(true));
     $("#showExcluded").addEventListener("change", (e) => { const n = $("#excludedNote"); if (n) n.hidden = !e.target.checked; renderResults(true); });
     $("#teacherName").addEventListener("blur", checkExistingName);
-    $("#tagChips").addEventListener("click", (e) => {
-      const chip = e.target.closest(".chip"); if (!chip) return;
-      activeTag = (activeTag === chip.dataset.tag) ? "" : chip.dataset.tag;
-      [...$("#tagChips").children].forEach((ch) => ch.classList.toggle("chip--on", ch.dataset.tag === activeTag));
+    $("#domainGrid").addEventListener("click", (e) => {
+      const card = e.target.closest(".domain-card"); if (!card) return;
+      activeTag = (activeTag === card.dataset.tag) ? "" : card.dataset.tag;
+      renderDomains();
       renderResults(true);
+      if (activeTag) $("#resultsHint").scrollIntoView({ behavior: "smooth", block: "start" });
     });
+    $("#clearDomain").addEventListener("click", () => { activeTag = ""; renderDomains(); renderResults(true); });
     $("#moreBtn").addEventListener("click", () => { shown += PAGE; renderResults(false); });
     $("#results").addEventListener("change", (e) => { const cb = e.target.closest(".item__check"); if (cb) toggle(cb.dataset.sn, cb.checked); });
     $("#loiloCard").addEventListener("change", (e) => { const cb = e.target.closest(".item__check"); if (cb) toggle(cb.dataset.sn, cb.checked); });

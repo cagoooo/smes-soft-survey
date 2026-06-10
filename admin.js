@@ -28,7 +28,7 @@
     { key: "classswift", name: "ClassSwift 課堂互動軟體", metric: "teachers" }
   ];
 
-  let db = null, FS = null, fbReady = false, SUBS = [];
+  let db = null, FS = null, fbReady = false, SUBS = [], SNTAGS = {};
 
   $("#gateBtn").addEventListener("click", tryEnter);
   $("#gateInput").addEventListener("keydown", (e) => { if (e.key === "Enter") tryEnter(); });
@@ -56,6 +56,9 @@
         $("#dataMode").textContent = `資料來源：Firebase 即時（${SUBS.length} 位老師填報）· 平均每班 ${AVG} 人`;
       } catch (e) { $("#dataMode").textContent = "讀取 Firebase 失敗：" + e.message; }
     } else { SUBS = readLocal(); $("#dataMode").textContent = `DEMO 模式（本機 ${SUBS.length} 筆）· 平均每班 ${AVG} 人`; }
+    if (!Object.keys(SNTAGS).length) {
+      try { const cat = await (await fetch("data/catalog.json", { cache: "no-cache" })).json(); cat.forEach((c) => { SNTAGS[c.sn] = c.tags || []; }); } catch (e) { }
+    }
     render();
   }
   function readLocal() { try { return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); } catch (e) { return []; } }
@@ -67,26 +70,66 @@
     TONGGOU.forEach((x) => buy[x.key] = { teachers: [], classUnion: new Set() });
     // 自主
     const soft = {}; // sn -> {name, group, teachers:[], classUnion:Set}
+    const byGroup = { 1: 0, 2: 0, 3: 0 }, byDomain = {}, byDay = {}, demandClasses = new Set();
     SUBS.forEach((s) => {
       const cls = Array.isArray(s.classes) ? s.classes : [];
       const t = s.tonggou || {};
+      let hasNeed = false;
       TONGGOU.forEach((x) => {
-        if (+t[x.key] > 0) { buy[x.key].teachers.push(s.name); cls.forEach((c) => buy[x.key].classUnion.add(c)); }
+        if (+t[x.key] > 0) { hasNeed = true; buy[x.key].teachers.push(s.name); cls.forEach((c) => buy[x.key].classUnion.add(c)); }
       });
       (s.picks || []).forEach((p) => {
+        hasNeed = true;
         const o = soft[p.sn] || (soft[p.sn] = { name: p.name, group: p.group, teachers: [], classUnion: new Set() });
         o.teachers.push(s.name); cls.forEach((c) => o.classUnion.add(c));
+        if (p.group) byGroup[p.group] = (byGroup[p.group] || 0) + 1;
+        (SNTAGS[p.sn] || []).forEach((tag) => byDomain[tag] = (byDomain[tag] || 0) + 1);
       });
+      if (hasNeed) cls.forEach((c) => demandClasses.add(c));
+      const day = (s.ts || "").slice(0, 10); if (day) byDay[day] = (byDay[day] || 0) + 1;
     });
     const ranked = Object.keys(soft).map((sn) => {
       const o = soft[sn];
       return { sn, name: o.name, group: o.group, teachers: o.teachers, count: o.teachers.length, classes: o.classUnion.size, students: studentsOf(o.classUnion) };
     }).sort((a, b) => b.count - a.count || b.students - a.students);
-    return { buy, ranked };
+    const byGrade = {};
+    (CFG.classGroups || []).forEach((g) => byGrade[g.grade] = 0);
+    demandClasses.forEach((id) => { const c = CLASSES.find((x) => x.id === id); if (c) byGrade[c.grade] = (byGrade[c.grade] || 0) + 1; });
+    return { buy, ranked, byGroup, byDomain, byGrade, byDay };
+  }
+
+  /* ── 圖表（純 CSS/SVG）── */
+  function barChart(elId, rows, color) {
+    const el = $(elId); if (!el) return;
+    const max = Math.max(1, ...rows.map((r) => r.value));
+    el.innerHTML = rows.length ? rows.map((r) =>
+      `<div class="bar"><span class="bar__l">${esc(r.label)}</span>
+        <span class="bar__track"><span class="bar__fill" style="width:${Math.round(r.value / max * 100)}%;background:${color || "var(--brand)"}"></span></span>
+        <span class="bar__v">${r.value}</span></div>`).join("") : `<p class="summary__empty">尚無資料</p>`;
+  }
+  function pieChart(elId, parts) {
+    const el = $(elId); if (!el) return;
+    const total = parts.reduce((n, p) => n + p.value, 0);
+    if (!total) { el.innerHTML = `<p class="summary__empty">尚無資料</p>`; return; }
+    let acc = 0; const segs = parts.map((p) => { const a = acc, b = acc + p.value / total * 360; acc = b; return `${p.color} ${a}deg ${b}deg`; }).join(",");
+    el.innerHTML = `<div class="pie" style="background:conic-gradient(${segs})"></div>
+      <div class="pie__legend">${parts.map((p) => `<span><i style="background:${p.color}"></i>${esc(p.label)}　${p.value}（${Math.round(p.value / total * 100)}%）</span>`).join("")}</div>`;
+  }
+  function renderCharts(a) {
+    pieChart("#chartGroup", [
+      { label: "數位內容", value: a.byGroup[1] || 0, color: "#4338ca" },
+      { label: "課堂教學軟體", value: a.byGroup[2] || 0, color: "#047857" },
+      { label: "遠距教學軟體", value: a.byGroup[3] || 0, color: "#b91c1c" }
+    ]);
+    barChart("#chartDomain", Object.keys(a.byDomain).map((t) => ({ label: t, value: a.byDomain[t] })).sort((x, y) => y.value - x.value).slice(0, 10), "var(--pick)");
+    barChart("#chartGrade", Object.keys(a.byGrade).map((g) => ({ label: g, value: a.byGrade[g] })), "var(--brand)");
+    barChart("#chartDay", Object.keys(a.byDay).sort().map((d) => ({ label: d.slice(5), value: a.byDay[d] })), "var(--rank)");
   }
 
   function render() {
-    const { buy, ranked } = aggregate();
+    const agg = aggregate();
+    const { buy, ranked } = agg;
+    renderCharts(agg);
 
     const picksTotal = SUBS.reduce((n, s) => n + (s.picks ? s.picks.length : 0), 0);
     $("#statGrid").innerHTML = [
@@ -166,6 +209,26 @@
         (s.picks || []).map((p) => p.name).join("；")]);
     });
     dl("石門國小_老師填報明細.csv", rows);
+  });
+  // 官方表單格式（對應教育局調查表欄位，可直接貼入）
+  $("#csvOfficial").addEventListener("click", () => {
+    const { buy, ranked } = aggregate();
+    const sUnit = (k) => studentsOf(buy[k].classUnion);
+    const rows = [];
+    rows.push(["桃園市115年數位內容與教學軟體需求調查表 — 系統彙整"]);
+    rows.push([`學校：${(CFG.school || {}).name || ""}`, `填表人：${(CFG.school || {}).reporter || ""}`]);
+    rows.push([]);
+    rows.push(["一、本局規劃統購之軟體"]);
+    rows.push(["序號", "軟體名稱", "實際需求數", "單位"]);
+    rows.push([1, "AILEAD365線上教學平臺", sUnit("ailead"), "需求學生數"]);
+    rows.push([2, "翰林雲端學院 TEAMS Lite 教師『派卷』+『派片』國中進度", sUnit("hanlin"), "需求學生數"]);
+    rows.push([3, "ClassSwift 課堂互動軟體", buy.classswift.teachers.length, "需求教師數"]);
+    rows.push([]);
+    rows.push(["二、各校自主需求軟體（依需求高低取前 5 名）"]);
+    rows.push(["排序", "教育部公告產品序號", "組別(1數位內容/2課堂教學/3遠距)", "品項名稱", "班級數", "教師數", "學生數"]);
+    ranked.slice(0, 5).forEach((r, i) => rows.push([i + 1, r.sn, r.group, r.name, r.classes, r.count, r.students]));
+    if (!ranked.length) rows.push(["（尚無自主需求填報）"]);
+    dl("石門國小_教育局官方表單格式.csv", rows);
   });
 
   $("#refreshBtn").addEventListener("click", load);
