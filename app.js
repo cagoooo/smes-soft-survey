@@ -122,10 +122,8 @@
     [...$("#roleOpts").children].forEach((b) => b.classList.toggle("role-btn--on", b.dataset.role === r));
     updateClassPicker();
     renderSummary();
-    // 收合狀態下選了需要選班級的職稱 → 捲回頂端展開班級選單
-    if ((r === "導師" || r === "科任") && $("#namebar").classList.contains("namebar--compact")) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    // 選了需要選班級的職稱 → 捲回頂端（收合狀態會因此展開，露出班級選單）
+    if (r === "導師" || r === "科任") window.scrollTo({ top: 0, behavior: "smooth" });
   }
   function updateClassPicker() {
     const box = $("#classPicker"), hint = $("#classHint"), grid = $("#classGrid");

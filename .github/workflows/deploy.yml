@@ -40,7 +40,7 @@ jobs:
         run: |
           set -e
           V="${{ github.sha }}"
-          sed -i "s/__VER__/$V/g" index.html admin.html official.html
+          sed -i "s/__VER__/$V/g" index.html admin.html official.html sw.js
           echo "✅ 資產版本號 = $V"
 
       - uses: actions/configure-pages@v5
