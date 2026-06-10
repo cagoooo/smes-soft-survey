@@ -116,32 +116,31 @@
     $("#roleOpts").innerHTML = ROLES.map((r) =>
       `<button class="role-btn" data-role="${r}" type="button">${r}</button>`).join("");
   }
-  function setRole(r) {
+  function setRole(r, openModal) {
     role = r;
     myClasses.clear();
     [...$("#roleOpts").children].forEach((b) => b.classList.toggle("role-btn--on", b.dataset.role === r));
-    updateClassPicker();
+    updateMyClassesLine();
     renderSummary();
-    // 選了需要選班級的職稱 → 捲回頂端（收合狀態會因此展開，露出班級選單）
-    if (r === "導師" || r === "科任") window.scrollTo({ top: 0, behavior: "smooth" });
+    // 點職稱（需選班級者）→ 跳出選班級彈窗（不跳頁）
+    if (openModal && (r === "導師" || r === "科任")) openClassModal();
   }
-  function updateClassPicker() {
-    const box = $("#classPicker"), hint = $("#classHint"), grid = $("#classGrid");
-    if (role === "行政／其他" || !role) {
-      box.hidden = true; return;
-    }
-    box.hidden = false;
-    hint.textContent = role === "導師"
-      ? "請點選你帶的班級（導師只能選 1 班）"
-      : "請點選你任教的班級（可多選）";
-    // 依年級分列
+  // 班級格（彈窗內）
+  function renderClassGrid() {
     const byGrade = {};
     CLASSES.forEach((c) => { (byGrade[c.grade] = byGrade[c.grade] || []).push(c); });
-    grid.innerHTML = Object.keys(byGrade).map((g) =>
+    $("#classGrid").innerHTML = Object.keys(byGrade).map((g) =>
       `<div class="cp__row"><span class="cp__grade">${esc(g)}</span>
         ${byGrade[g].map((c) => `<button class="cp__chip ${myClasses.has(c.id) ? "cp__chip--on" : ""}" data-cid="${c.id}" type="button">${esc(c.label)}</button>`).join("")}
        </div>`).join("");
   }
+  function openClassModal() {
+    $("#classModalTitle").textContent = role === "導師" ? "請選擇你帶的班級" : "請選擇你任教的班級";
+    $("#classModalHint").textContent = role === "導師" ? "導師只能選 1 班（點一下即完成）" : "可多選：點選你任教的每個班，選完按「完成」";
+    renderClassGrid();
+    $("#classModal").hidden = false;
+  }
+  function closeClassModal() { $("#classModal").hidden = true; updateMyClassesLine(); renderSummary(); }
   function toggleClass(cid) {
     if (role === "導師") {
       const had = myClasses.has(cid);
@@ -151,7 +150,18 @@
       if (myClasses.has(cid)) myClasses.delete(cid); else myClasses.add(cid);
     }
     [...$("#classGrid").querySelectorAll(".cp__chip")].forEach((b) => b.classList.toggle("cp__chip--on", myClasses.has(b.dataset.cid)));
-    renderSummary();
+    updateMyClassesLine();
+    if (role === "導師" && myClasses.size === 1) closeClassModal();   // 導師選 1 班即完成
+  }
+  // namebar 顯示已選班級 + 重選
+  function updateMyClassesLine() {
+    const line = $("#myClassesLine");
+    if (!role || role === "行政／其他") { line.hidden = true; line.innerHTML = ""; return; }
+    line.hidden = false;
+    const idLabel = (id) => { const c = CLASSES.find((x) => x.id === id); return c ? c.grade + c.label : id; };
+    line.innerHTML = myClasses.size
+      ? `任教班級：${[...myClasses].map((i) => `<b>${esc(idLabel(i))}</b>`).join("、")} <button class="link-btn" id="editClasses" type="button">✏️ 重選</button>`
+      : `<button class="link-btn link-btn--warn" id="editClasses" type="button">⚠️ 請點此選擇你的班級</button>`;
   }
 
   /* ── 區塊一：統購（全部勾選制）── */
@@ -356,9 +366,9 @@
     buy.ailead = !!(rec.tonggou || {}).ailead; buy.hanlin = !!(rec.tonggou || {}).hanlin; buy.classswift = !!(rec.tonggou || {}).classswift;
     TONGGOU.forEach((t) => { const cb = document.querySelector(`[data-buycheck="${t.key}"]`); if (cb) cb.checked = buy[t.key]; });
     picks.clear(); (rec.picks || []).forEach((p) => picks.add(p.sn));
-    setRole(rec.role || "");
+    setRole(rec.role || "", false);
     (rec.classes || []).forEach((id) => myClasses.add(id));
-    updateClassPicker();
+    updateMyClassesLine();
     renderLoilo(); renderResults(true); renderSummary();
     hint.textContent = `已載入 ${name} 老師先前填的內容，可直接修改後再送出。`;
   }
@@ -388,8 +398,11 @@
 
   /* ── 事件 ── */
   function bindEvents() {
-    $("#roleOpts").addEventListener("click", (e) => { const b = e.target.closest(".role-btn"); if (b) setRole(b.dataset.role); });
+    $("#roleOpts").addEventListener("click", (e) => { const b = e.target.closest(".role-btn"); if (b) setRole(b.dataset.role, true); });
     $("#classGrid").addEventListener("click", (e) => { const b = e.target.closest(".cp__chip"); if (b) toggleClass(b.dataset.cid); });
+    $("#classDone").addEventListener("click", closeClassModal);
+    $("#classModal").addEventListener("click", (e) => { if (e.target.id === "classModal") closeClassModal(); });
+    $("#myClassesLine").addEventListener("click", (e) => { if (e.target.closest("#editClasses")) openClassModal(); });
     $("#tonggouGrid").addEventListener("change", (e) => { const cb = e.target.closest("[data-buycheck]"); if (cb) { buy[cb.dataset.buycheck] = cb.checked; renderSummary(); } });
 
     let t;
@@ -419,11 +432,11 @@
     $("#submitBtn").addEventListener("click", submit);
     $("#loadMineBtn").addEventListener("click", loadMine);
 
-    // 置頂列捲動收合（避免占用下方畫面）
-    const nb = $("#namebar"); let compact = false;
+    // 置頂列捲動收合（避免占用下方畫面）；以 class 為狀態，避免旗標不同步
+    const nb = $("#namebar");
     window.addEventListener("scroll", () => {
       const c = window.scrollY > 150;
-      if (c !== compact) { compact = c; nb.classList.toggle("namebar--compact", c); }
+      if (c !== nb.classList.contains("namebar--compact")) nb.classList.toggle("namebar--compact", c);
     }, { passive: true });
   }
 })();

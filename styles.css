@@ -448,7 +448,7 @@ body{ font-size:17px; }
 .namebar{ transition:padding .15s; }
 .namebar--compact{ display:flex; align-items:center; gap:8px 10px; flex-wrap:wrap; padding:8px 14px !important; }
 .namebar--compact .namebar__label,
-.namebar--compact #classPicker,
+.namebar--compact #myClassesLine,
 .namebar--compact .namebar__why,
 .namebar--compact .namebar__hint,
 .namebar--compact #loadMineBtn{ display:none !important; }
@@ -458,6 +458,22 @@ body{ font-size:17px; }
 .namebar--compact .role-btn{ padding:8px 14px; font-size:14.5px; min-height:0; }
 .namebar--compact .namebar__extra{ margin:0 0 0 auto; flex-shrink:0; }   /* 狀態靠右 */
 .namebar--compact::before{ content:"✏️"; font-size:18px; flex-shrink:0; }
+
+/* namebar 已選班級列 */
+.myclasses{ margin-top:12px; font-size:15px; color:var(--ink); line-height:1.7; }
+.myclasses b{ color:var(--brand-d); }
+.link-btn{ background:none; border:none; color:var(--brand); font-weight:700; font-size:14px;
+  cursor:pointer; text-decoration:underline; font-family:inherit; padding:2px 4px; }
+.link-btn--warn{ color:var(--danger); }
+
+/* 選班級彈窗 */
+.modal{ position:fixed; inset:0; background:rgba(15,30,45,.5); z-index:200;
+  display:flex; align-items:center; justify-content:center; padding:16px; }
+.modal__box{ max-width:560px; width:100%; max-height:86vh; overflow:auto; }
+.modal__t{ margin:0 0 4px; font-size:20px; font-weight:800; }
+.modal__hint{ margin:0 0 14px; font-size:14px; color:var(--muted); }
+.modal .classpicker__grid{ margin-bottom:16px; }
+.modal .cp__chip{ min-width:52px; min-height:48px; font-size:17px; }
 
 /* 領域大卡入口 */
 .domain-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin:4px 0 12px; flex-wrap:wrap; }

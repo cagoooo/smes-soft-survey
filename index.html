@@ -51,10 +51,7 @@
       <div class="role-opts" id="roleOpts"><!-- JS render --></div>
     </div>
 
-    <div id="classPicker" class="classpicker" hidden>
-      <p class="classpicker__hint" id="classHint"></p>
-      <div class="classpicker__grid" id="classGrid"><!-- JS render --></div>
-    </div>
+    <div id="myClassesLine" class="myclasses" hidden></div>
 
     <p class="namebar__why">💡 班級數、教師數、學生數都由系統自動統計（同一班被導師＋科任重複需求只算一次），你只要勾選需要的軟體即可。</p>
     <div class="namebar__extra">
@@ -155,6 +152,16 @@
     >阿凱老師</a>
   </p>
 </footer>
+
+<!-- 選擇班級彈窗 -->
+<div id="classModal" class="modal" hidden>
+  <div class="modal__box card">
+    <h3 class="modal__t" id="classModalTitle">請選擇你的班級</h3>
+    <p class="modal__hint" id="classModalHint"></p>
+    <div class="classpicker__grid" id="classGrid"><!-- JS render --></div>
+    <button id="classDone" class="btn btn--submit" type="button">完成</button>
+  </div>
+</div>
 
 <script src="data/config.js?v=__VER__"></script>
 <script src="app.js?v=__VER__"></script>
