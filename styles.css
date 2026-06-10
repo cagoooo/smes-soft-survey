@@ -452,11 +452,11 @@ body{ font-size:17px; }
 .namebar--compact .namebar__why,
 .namebar--compact .namebar__hint,
 .namebar--compact #loadMineBtn{ display:none !important; }
-.namebar--compact .namebar__input{ flex:1 1 180px; margin:0; font-size:16px; padding:9px 12px; }
+.namebar--compact .namebar__input{ flex:1 1 200px; max-width:460px; margin:0; font-size:16px; padding:9px 12px; }
 .namebar--compact .role-row{ margin:0; gap:6px; }
 .namebar--compact .role-row__label{ display:none; }   /* 收合時省空間，只留職稱鈕 */
 .namebar--compact .role-btn{ padding:8px 14px; font-size:14.5px; min-height:0; }
-.namebar--compact .namebar__extra{ margin:0; flex-shrink:0; }
+.namebar--compact .namebar__extra{ margin:0 0 0 auto; flex-shrink:0; }   /* 狀態靠右 */
 .namebar--compact::before{ content:"✏️"; font-size:18px; flex-shrink:0; }
 
 /* 領域大卡入口 */
