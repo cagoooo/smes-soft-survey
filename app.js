@@ -35,6 +35,44 @@
   const myClasses = new Set();             // 我的班級 id
   let activeTag = "", shown = 0;
   const PAGE = 40;
+  let submitted = false;                    // 是否已成功送出（狀態徽章用）
+  const existingNames = new Set();           // 已填報過的姓名（重複提醒用）
+
+  /* ── 字級切換（年長友善）── */
+  const FS_KEY = "smes_fontscale";
+  function initFontScale() {
+    applyFontScale(localStorage.getItem(FS_KEY) || "1", false);
+    const box = $("#fontScale");
+    if (box) box.addEventListener("click", (e) => {
+      const b = e.target.closest(".fontscale__btn"); if (b) applyFontScale(b.dataset.fs, true);
+    });
+  }
+  function applyFontScale(z, persist) {
+    document.documentElement.style.zoom = z;
+    if (persist) { try { localStorage.setItem(FS_KEY, z); } catch (e) { } }
+    const box = $("#fontScale");
+    if (box) [...box.querySelectorAll(".fontscale__btn")].forEach((b) => b.classList.toggle("fontscale__btn--on", b.dataset.fs === String(z)));
+  }
+
+  /* ── 填報狀態徽章 ── */
+  function selectedCount() { return (buy.ailead ? 1 : 0) + (buy.hanlin ? 1 : 0) + (buy.classswift ? 1 : 0) + picks.size; }
+  function updateStatus() {
+    const b = $("#statusBadge"); if (!b) return;
+    const n = selectedCount();
+    if (submitted) { b.className = "status-badge status-badge--done"; b.textContent = `✅ 已送出（${n} 套）`; }
+    else if (n > 0) { b.className = "status-badge status-badge--picked"; b.textContent = `已勾選 ${n} 套，尚未送出`; }
+    else { b.className = "status-badge"; b.textContent = "尚未勾選"; }
+  }
+
+  /* ── 重複填報提醒（A2）── */
+  function checkExistingName() {
+    const name = $("#teacherName").value.trim(), hint = $("#nameHint");
+    if (!name) { hint.textContent = ""; hint.style.color = ""; return; }
+    if (existingNames.has(name)) {
+      hint.style.color = "var(--warn)";
+      hint.textContent = "⚠️ 此姓名已有填報紀錄。再次送出會「覆蓋更新」；想修改可按上方「載入我先前填過的」。";
+    } else { hint.textContent = ""; hint.style.color = ""; }
+  }
 
   /* ── Firebase（可選）── */
   let db = null, FS = null, fbReady = false;
@@ -55,6 +93,7 @@
   init();
   async function init() {
     if (CFG.deadline) $("#deadlinePill").textContent = CFG.deadline;
+    initFontScale();
     renderRoles();
     renderTonggou();
     try {
@@ -125,7 +164,8 @@
          <label class="buy__check">
            <input type="checkbox" data-buycheck="${t.key}" aria-label="我需要 ${esc(t.name)}" />
            <span>我需要這套<small>（${note}）</small></span>
-         </label>`;
+         </label>
+         ${infoLink(t.name, t.brand, "buy__link")}`;
       g.appendChild(card);
     });
   }
@@ -146,15 +186,21 @@
        <label class="buy__check" style="background:var(--loilo-l);border-color:var(--loilo);color:var(--loilo)">
          <input type="checkbox" class="item__check" data-sn="${item.sn}" ${on ? "checked" : ""} />
          <span>我要繼續使用 LoiLoNote，把它列入需求</span>
-       </label>`;
+       </label>
+       ${infoLink(item.name, item.brand, "loilo__link")}`;
   }
 
   /* ── 領域 chips ── */
   function renderChips() {
-    const box = $("#tagChips"), present = new Set();
-    POOL.forEach((c) => c.tags.forEach((t) => present.add(t)));
-    box.innerHTML = (CFG.tagOrder || []).filter((t) => present.has(t))
-      .map((t) => `<button class="chip" data-tag="${esc(t)}" type="button">${esc(t)}</button>`).join("");
+    const box = $("#tagChips"), counts = {};
+    POOL.forEach((c) => { if (!c.excluded) c.tags.forEach((t) => counts[t] = (counts[t] || 0) + 1); });
+    box.innerHTML = (CFG.tagOrder || []).filter((t) => counts[t])
+      .map((t) => `<button class="chip" data-tag="${esc(t)}" type="button">${esc(t)}<span class="chip__n">${counts[t]}</span></button>`).join("");
+  }
+  // 「了解這套」Google 查詢連結
+  function infoLink(name, brand, cls) {
+    const q = encodeURIComponent(`${name} ${brand || ""}`.trim());
+    return `<a class="${cls}" href="https://www.google.com/search?q=${q}" target="_blank" rel="noopener noreferrer">🔍 了解這套</a>`;
   }
 
   /* ── 篩選 ── */
@@ -189,6 +235,7 @@
         <div class="item__body">
           <p class="item__name">${esc(c.name)}</p>
           <p class="item__meta">${gt} <span>${esc(c.brand)}</span> <span>· ${c.sn}</span> ${exBadge} ${tags}</p>
+          <div class="item__foot">${infoLink(c.name, c.brand, "item__link")}</div>
         </div>
       </li>`;
   }
@@ -206,6 +253,7 @@
 
   /* ── 摘要 ── */
   function renderSummary() {
+    submitted = false;                 // 任何變動 → 回到「尚未送出」
     const box = $("#summary");
     const clsArr = [...myClasses];
     const idLabel = (id) => { const c = CLASSES.find((x) => x.id === id); return c ? c.grade + c.label : id; };
@@ -220,6 +268,7 @@
     if (pickNames.length) { html += `<div class="sumhead">自主需求軟體（${pickNames.length} 項）</div>`; [...picks].forEach((sn) => html += row((SNMAP[sn] || {}).name || sn, "", sn)); }
     if (!buyNames.length && !pickNames.length) html += `<p class="summary__empty">還沒勾選任何軟體。往上勾選你需要的吧！</p>`;
     box.innerHTML = html;
+    updateStatus();
   }
   function row(name, val, sn) {
     return `<div class="sumrow"><span>${esc(name)}</span>
@@ -229,13 +278,17 @@
   /* ── 送出 ── */
   async function submit() {
     const name = $("#teacherName").value.trim(), msg = $("#submitMsg");
-    const fail = (m) => { msg.className = "submit-msg err"; msg.textContent = m; };
-    if (!name) { fail("請先填寫姓名（實名制）。"); $("#teacherName").focus(); return; }
-    if (!role) { fail("請選擇職稱。"); return; }
-    if (role === "導師" && myClasses.size !== 1) { fail("導師請選擇 1 個帶班班級。"); return; }
-    if (role === "科任" && myClasses.size < 1) { fail("科任請至少選擇 1 個任教班級。"); return; }
+    const fail = (m, sel) => {
+      msg.className = "submit-msg err"; msg.textContent = m;
+      const el = sel && $(sel);
+      if (el) { el.classList.add("needs-attention"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.classList.remove("needs-attention"), 1600); }
+    };
+    if (!name) { fail("請先填寫姓名（實名制）。", "#namebar"); $("#teacherName").focus(); return; }
+    if (!role) { fail("請選擇職稱（導師／科任／行政）。", "#roleOpts"); return; }
+    if (role === "導師" && myClasses.size !== 1) { fail("導師請點選 1 個帶班班級。", "#classPicker"); return; }
+    if (role === "科任" && myClasses.size < 1) { fail("科任請至少點選 1 個任教班級。", "#classPicker"); return; }
     const hasNeed = TONGGOU.some((t) => buy[t.key]) || picks.size > 0;
-    if (!hasNeed) { fail("你還沒勾選任何軟體。"); return; }
+    if (!hasNeed) { fail("你還沒勾選任何軟體（統購或自主至少選一項）。", "#tonggouGrid"); return; }
 
     const record = {
       name, role, classes: [...myClasses],
@@ -256,6 +309,9 @@
       }
       msg.className = "submit-msg ok";
       msg.textContent = `✅ 已送出，謝謝 ${name} 老師！你的需求已記錄${fbReady ? "（即時統計）" : "（本機 DEMO）"}。`;
+      existingNames.add(name);
+      submitted = true; updateStatus();
+      $("#nameHint").textContent = "";
       renderRank();
     } catch (e) { console.error(e); fail("送出失敗，請稍後再試或通知資訊組。"); }
     finally { $("#submitBtn").disabled = false; }
@@ -288,6 +344,9 @@
       try { const snap = await FS.getDocs(FS.collection(db, CFG.collection)); snap.forEach((d) => subs.push(d.data())); mode.textContent = "資料來源：Firebase 即時統計"; }
       catch (e) { mode.textContent = "讀取即時資料失敗"; }
     } else { subs = readLocal(); mode.textContent = "DEMO 模式：統計僅來自本機瀏覽器（接上 Firebase 後即為全校即時）"; }
+    existingNames.clear();
+    subs.forEach((s) => { if (s.name) existingNames.add(s.name); });
+    checkExistingName();
     const cnt = {};
     subs.forEach((s) => (s.picks || []).forEach((p) => { cnt[p.sn] = (cnt[p.sn] || 0) + 1; }));
     const ranked = Object.keys(cnt).map((sn) => ({ sn, n: cnt[sn], name: (SNMAP[sn] || {}).name || sn })).sort((a, b) => b.n - a.n).slice(0, 5);
@@ -309,7 +368,8 @@
     let t;
     $("#searchInput").addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => renderResults(true), 180); });
     $("#groupSelect").addEventListener("change", () => renderResults(true));
-    $("#showExcluded").addEventListener("change", () => renderResults(true));
+    $("#showExcluded").addEventListener("change", (e) => { const n = $("#excludedNote"); if (n) n.hidden = !e.target.checked; renderResults(true); });
+    $("#teacherName").addEventListener("blur", checkExistingName);
     $("#tagChips").addEventListener("click", (e) => {
       const chip = e.target.closest(".chip"); if (!chip) return;
       activeTag = (activeTag === chip.dataset.tag) ? "" : chip.dataset.tag;

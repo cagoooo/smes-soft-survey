@@ -13,6 +13,11 @@
   const AVG = CFG.avgClassSize || 25;
   const CLASSES = (CFG.classGroups || []).flatMap((g) => g.classes.map((c) => ({ id: g.grade + c, grade: g.grade, label: c })));
   const clsLabel = (id) => { const c = CLASSES.find((x) => x.id === id); return c ? c.grade + c.label : id; };
+  const SIZES = CFG.classSizes || {};
+  const classSize = (id) => (+SIZES[id] || AVG);                       // 各班實際人數，無則用平均
+  const studentsOf = (set) => [...set].reduce((n, id) => n + classSize(id), 0);
+  // 套用老師端設定的字級（同源 localStorage）
+  try { document.documentElement.style.zoom = localStorage.getItem("smes_fontscale") || "1"; } catch (e) { }
 
   // 輕量密碼閘（可自行修改）。Firestore 為公開讀取，此僅避免誤入，非真實權限控管。
   const ADMIN_CODE = "smes-survey-2026";
@@ -74,8 +79,8 @@
       });
     });
     const ranked = Object.keys(soft).map((sn) => {
-      const o = soft[sn]; const classes = o.classUnion.size;
-      return { sn, name: o.name, group: o.group, teachers: o.teachers, count: o.teachers.length, classes, students: classes * AVG };
+      const o = soft[sn];
+      return { sn, name: o.name, group: o.group, teachers: o.teachers, count: o.teachers.length, classes: o.classUnion.size, students: studentsOf(o.classUnion) };
     }).sort((a, b) => b.count - a.count || b.students - a.students);
     return { buy, ranked };
   }
@@ -96,7 +101,7 @@
       const b = buy[x.key], n = b.teachers.length, cls = b.classUnion.size;
       const val = x.metric === "teachers"
         ? `教師數 <b>${n}</b>`
-        : `學生數 <b>${cls * AVG}</b> <span style="color:var(--muted);font-size:12px">（${cls} 班去重 × ${AVG}）· 教師 ${n}</span>`;
+        : `學生數 <b>${studentsOf(b.classUnion)}</b> <span style="color:var(--muted);font-size:12px">（${cls} 班去重推估）· 教師 ${n}</span>`;
       return `<div class="sumrow"><span><b>${esc(x.name)}</b></span><span>${val}</span></div>
         <div style="font-size:12px;color:var(--muted);margin:-2px 0 8px">需求老師：${b.teachers.map(esc).join("、") || "—"}</div>`;
     }).join("");

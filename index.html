@@ -18,6 +18,12 @@
       <span class="pill pill--warn" id="deadlinePill">⏰ 校內填報截止：6/24（一）放學前</span>
       <span class="pill">📋 實名制 · 配發數作為明年度依據</span>
     </div>
+    <div class="fontscale" id="fontScale" role="group" aria-label="字級調整">
+      <span class="fontscale__label">🔠 字級</span>
+      <button type="button" data-fs="1" class="fontscale__btn">標準</button>
+      <button type="button" data-fs="1.15" class="fontscale__btn">大 A＋</button>
+      <button type="button" data-fs="1.3" class="fontscale__btn">特大 A＋＋</button>
+    </div>
   </div>
 </header>
 
@@ -52,6 +58,7 @@
     <p class="namebar__why">💡 班級數、教師數、學生數都由系統自動統計（同一班被導師＋科任重複需求只算一次），你只要勾選需要的軟體即可。</p>
     <div class="namebar__extra">
       <button id="loadMineBtn" class="btn btn--ghost" type="button">載入我先前填過的</button>
+      <span class="status-badge" id="statusBadge">尚未勾選</span>
     </div>
     <p class="namebar__hint" id="nameHint"></p>
   </section>
@@ -94,6 +101,8 @@
         <span class="toolbar__count" id="resultCount"></span>
       </div>
     </div>
+
+    <p class="excluded-note" id="excludedNote" hidden>ℹ️ 標示「已大量採購·免填」的軟體，是教育局先前已大量採購（HiTeach、PaGamO、Padlet、Kahoot! 等），本次無須重複填報，因此無法勾選。</p>
 
     <!-- 結果清單 -->
     <div id="resultsHint" class="results-hint">輸入關鍵字或點選上方領域 / 組別，開始挑選軟體 👆</div>
