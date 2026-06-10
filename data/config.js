@@ -22,6 +22,9 @@ window.SURVEY_CONFIG = {
   },
   collection: "submissions",      // Firestore 集合名稱
 
+  // ── Google Chat 即時通知（GAS 中繼，webhook 存 GAS Script Property）──
+  notifyEndpoint: "https://script.google.com/macros/s/AKfycbyjR2ikSLspSLowYk8Yy0WVHgERTiE5fU4cPKw62jILJRE4qrK7rE-9i78rV_BXibqkLA/exec",
+
   // ── 填報資訊 ──
   formNo:    "1667",              // 教育局線上填報編號
   docNo:     "桃教資字第1150051445號",
@@ -59,8 +62,8 @@ window.SURVEY_CONFIG = {
   ],
 
   // ── 各班實際人數（選填，精算學生數用）──
-  // 留空時學生數＝班級數×avgClassSize；填了哪幾班就用該班實際人數，其餘仍用平均。
-  // 範例：{ "一年級1班": 26, "一年級2班": 25, ... }
+  // 2026-06-10 阿凱老師確認：全校統一用平均 25 人/班，故留空（自動回退 avgClassSize）。
+  // 日後若要精算，填入如 { "一年級1班": 26, ... } 即可，填到的班用實際數、其餘用平均。
   classSizes: {},
 
   // ── 領域標籤（顯示順序）──

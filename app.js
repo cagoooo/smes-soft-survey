@@ -368,6 +368,7 @@
     };
 
     $("#submitBtn").disabled = true;
+    const wasUpdate = existingNames.has(name);   // 在加入名單前判斷是否為更新
     try {
       if (fbReady) {
         const id = name.replace(/[\/#\.\[\]\$]/g, "_");
@@ -387,6 +388,22 @@
       $("#successMsg").textContent = `謝謝 ${name} 老師！你的 ${selectedCount()} 套軟體需求已送達資訊組`;
       $("#successModal").hidden = false;
       launchConfetti();
+      // Google Chat 即時通知（fire-and-forget，失敗不影響送出）
+      try {
+        if (CFG.notifyEndpoint && fbReady) {
+          fetch(CFG.notifyEndpoint, {
+            method: "POST", mode: "no-cors",
+            headers: { "Content-Type": "text/plain" },   // simple request，避免 CORS preflight
+            body: JSON.stringify({
+              name, role, isUpdate: wasUpdate,
+              classes: [...myClasses].map(clsLabel),
+              tonggou: TONGGOU.filter((t) => buy[t.key]).map((t) => t.name),
+              picks: [...picks].map((sn) => (SNMAP[sn] || {}).name || sn),
+              total: existingNames.size
+            })
+          }).catch(() => {});
+        }
+      } catch (e) { /* 通知失敗不影響填報 */ }
     } catch (e) { console.error(e); fail("送出失敗，請稍後再試或通知資訊組。"); }
     finally { $("#submitBtn").disabled = false; }
   }
