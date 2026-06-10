@@ -5,6 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>數位內容與教學軟體需求調查｜桃園市龍潭區石門國民小學</title>
 <meta name="description" content="石門國小 115 年中小學數位學習實施計畫－教學軟體需求調查填報" />
+
+<!-- favicon / PWA -->
+<meta name="theme-color" content="#0f766e" />
+<link rel="icon" href="favicon.ico?v=__VER__" sizes="any" />
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=__VER__" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=__VER__" />
+<link rel="manifest" href="manifest.webmanifest?v=__VER__" />
+
+<!-- Open Graph / 社群分享卡片（LINE / FB / Twitter）-->
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="zh_TW" />
+<meta property="og:site_name" content="桃園市龍潭區石門國民小學" />
+<meta property="og:url" content="https://cagoooo.github.io/smes-soft-survey/" />
+<meta property="og:title" content="115年數位內容與教學軟體需求調查｜石門國小" />
+<meta property="og:description" content="老師線上實名填報：統購軟體＋自主需求軟體，全校需求前 5 名提報教育局。截止 6/19（五）。" />
+<meta property="og:image" content="https://cagoooo.github.io/smes-soft-survey/og-preview.png?v=__VER__" />
+<meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-soft-survey/og-preview.png?v=__VER__" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:alt" content="石門國小 數位內容與教學軟體需求調查" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="115年數位內容與教學軟體需求調查｜石門國小" />
+<meta name="twitter:description" content="統購＋自主需求軟體線上填報，全校前 5 名提報教育局。" />
+<meta name="twitter:image" content="https://cagoooo.github.io/smes-soft-survey/og-preview.png?v=__VER__" />
+
 <link rel="stylesheet" href="styles.css?v=__VER__" />
 </head>
 <body>
@@ -160,6 +186,26 @@
     <p class="modal__hint" id="classModalHint"></p>
     <div class="classpicker__grid" id="classGrid"><!-- JS render --></div>
     <button id="classDone" class="btn btn--submit" type="button">完成</button>
+  </div>
+</div>
+
+<!-- 送出成功 · 心願達成 -->
+<div id="successModal" class="modal success" hidden>
+  <div class="success__confetti" id="confetti"></div>
+  <div class="success__box">
+    <div class="success__check">
+      <svg viewBox="0 0 80 80" aria-hidden="true">
+        <circle class="sc-ring" cx="40" cy="40" r="35"/>
+        <path class="sc-tick" d="M25 41 l10 10 l21 -24"/>
+      </svg>
+    </div>
+    <h2 class="success__title">🎉 需求送出成功！</h2>
+    <p class="success__msg" id="successMsg"></p>
+    <p class="success__sub">你的需求已列入全校統計，前 5 名將提報教育局 ✨<br>感謝你撥空填寫 🙏</p>
+    <div class="success__btns">
+      <button id="successRank" class="btn btn--submit" type="button">📊 看看全校前 5 名</button>
+      <button id="successClose" class="btn btn--ghost" type="button">完成</button>
+    </div>
   </div>
 </div>
 

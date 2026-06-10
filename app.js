@@ -28,6 +28,24 @@
   const ROLES = ["導師", "科任", "行政／其他"];
   const clsLabel = (id) => { const c = CLASSES.find((x) => x.id === id); return c ? c.grade + c.label : id; };
 
+  /* ── 送出成功彩帶 ── */
+  function launchConfetti() {
+    const box = $("#confetti"); if (!box) return; box.innerHTML = "";
+    const colors = ["#0f766e", "#2563eb", "#db2777", "#d97706", "#7c3aed", "#10b981", "#fde047"];
+    for (let i = 0; i < 46; i++) {
+      const p = document.createElement("i"); p.className = "confetti-piece";
+      p.style.left = (Math.random() * 100) + "%";
+      p.style.background = colors[i % colors.length];
+      p.style.width = (7 + Math.random() * 7) + "px";
+      p.style.height = (10 + Math.random() * 9) + "px";
+      p.style.animationDuration = (2 + Math.random() * 1.7) + "s";
+      p.style.animationDelay = (Math.random() * 0.5) + "s";
+      p.style.setProperty("--r", (Math.random() * 720 - 360) + "deg");
+      box.appendChild(p);
+    }
+    setTimeout(() => { box.innerHTML = ""; }, 4500);
+  }
+
   /* ── 操作回饋 toast ── */
   function showToast(msg) {
     let t = $("#toast");
@@ -365,6 +383,10 @@
       submitted = true; updateStatus();
       $("#nameHint").textContent = "";
       renderRank();
+      // 心願送出儀式感
+      $("#successMsg").textContent = `謝謝 ${name} 老師！你的 ${selectedCount()} 套軟體需求已送達資訊組`;
+      $("#successModal").hidden = false;
+      launchConfetti();
     } catch (e) { console.error(e); fail("送出失敗，請稍後再試或通知資訊組。"); }
     finally { $("#submitBtn").disabled = false; }
   }
@@ -446,6 +468,11 @@
     });
     $("#submitBtn").addEventListener("click", submit);
     $("#loadMineBtn").addEventListener("click", loadMine);
+
+    // 送出成功彈窗
+    $("#successClose").addEventListener("click", () => { $("#successModal").hidden = true; });
+    $("#successModal").addEventListener("click", (e) => { if (e.target.id === "successModal") $("#successModal").hidden = true; });
+    $("#successRank").addEventListener("click", () => { $("#successModal").hidden = true; $("#rankList").scrollIntoView({ behavior: "smooth", block: "center" }); });
 
     // 置頂列捲動收合（避免占用下方畫面）；以 class 為狀態，避免旗標不同步
     const nb = $("#namebar");
