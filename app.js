@@ -416,5 +416,12 @@
     });
     $("#submitBtn").addEventListener("click", submit);
     $("#loadMineBtn").addEventListener("click", loadMine);
+
+    // 置頂列捲動收合（避免占用下方畫面）
+    const nb = $("#namebar"); let compact = false;
+    window.addEventListener("scroll", () => {
+      const c = window.scrollY > 150;
+      if (c !== compact) { compact = c; nb.classList.toggle("namebar--compact", c); }
+    }, { passive: true });
   }
 })();
