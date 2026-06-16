@@ -21,8 +21,24 @@ function chatCard_(title, subtitle, rows, body, buttons) {
       return { text: b.text, onClick: { openLink: { url: b.url } } };
     }) } });
   }
-  return { cardsV2: [{ cardId: 'c-' + Date.now(),
-    card: { header: { title: title, subtitle: subtitle }, sections: [{ widgets: widgets }] } }] };
+
+  // 建立適合手機推播的純文字摘要（結合標題與第一行資訊，如職稱班級）
+  var notificationText = title;
+  if (rows && rows.length > 0) {
+    var firstRow = rows[0];
+    if (firstRow && firstRow.text) {
+      var info = firstRow.text.replace(/<[^>]*>/g, '').trim();
+      if (info) {
+        notificationText += ' (' + info + ')';
+      }
+    }
+  }
+
+  return {
+    text: notificationText,
+    cardsV2: [{ cardId: 'c-' + Date.now(),
+      card: { header: { title: title, subtitle: subtitle }, sections: [{ widgets: widgets }] } }]
+  };
 }
 
 function pushChat_(payload) {
