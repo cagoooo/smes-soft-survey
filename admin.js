@@ -296,6 +296,87 @@
     dl("石門國小_教育局官方表單格式.csv", rows);
   });
 
+  // ── 一鍵複製官方填報文字（對應教育局 1667 線上表單，可直接貼上）──
+  function buildOfficialText() {
+    const { buy, ranked } = aggregate();
+    const officialPicks = getOfficialPicks(ranked);
+    const sch = CFG.school || {};
+    const sStu = (k) => studentsOf(buy[k].classUnion);
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    const stamp = `${now.getFullYear()}/${pad(now.getMonth() + 1)}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const L = [];
+    L.push(`桃園市115年「中小學數位學習實施計畫」數位內容與教學軟體需求調查`);
+    L.push(`（教育局線上填報編號 ${CFG.formNo || "1667"}／${CFG.docNo || ""}）`);
+    L.push("");
+    L.push(`學校：${sch.name || ""}`);
+    L.push(`填表人：${sch.reporter || ""}　電話：${sch.phone || ""}`);
+    L.push(`產出時間：${stamp}　填報老師數：${SUBS.length} 位`);
+    L.push("");
+    L.push("═══ 一、本局規劃統購之軟體 ═══");
+    L.push(`1. AILEAD365線上教學平臺　需求學生數：${sStu("ailead")} 人`);
+    L.push(`2. 翰林雲端學院 TEAMS Lite（教師派卷+派片國中進度）　需求學生數：${sStu("hanlin")} 人`);
+    L.push(`3. ClassSwift 課堂互動軟體　需求教師數：${buy.classswift.teachers.length} 人`);
+    L.push("");
+    L.push("═══ 二、各校自主需求軟體（依需求高低取前 5 名）═══");
+    L.push("排序　產品序號　組別　品項名稱　班級數　教師數　學生數");
+    const picked = officialPicks.map((sn) => ranked.find((r) => r.sn === sn)).filter(Boolean);
+    if (picked.length) {
+      picked.forEach((r, i) => L.push(`${i + 1}　${r.sn}　${GROUP[r.group] || ""}　${r.name}　${r.classes}　${r.count}　${r.students}`));
+    } else {
+      L.push("（尚無自主需求填報）");
+    }
+    return L.join("\n");
+  }
+  async function copyText(text) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); return true; }
+    } catch (e) { /* 退回 execCommand */ }
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      const ok = document.execCommand("copy"); document.body.removeChild(ta); return ok;
+    } catch (e) { return false; }
+  }
+  $("#copyOfficial").addEventListener("click", async (e) => {
+    const btn = e.currentTarget;
+    const text = buildOfficialText();
+    const ok = await copyText(text);
+    const orig = btn.textContent;
+    if (ok) {
+      btn.textContent = "✅ 已複製，貼到 1667 即可";
+      setTimeout(() => { btn.textContent = orig; }, 2600);
+    } else {
+      // 複製失敗：開新視窗讓承辦人手動全選複製
+      const w = window.open("", "_blank");
+      if (w) { w.document.write("<pre style='font:14px/1.7 monospace;padding:20px;white-space:pre-wrap'>" + esc(text) + "</pre>"); w.document.title = "官方填報文字（請全選複製）"; }
+      else { alert("複製失敗，請手動複製：\n\n" + text); }
+    }
+  });
+
+  // ── 完整備份 JSON（保險用，含 metadata）──
+  $("#backupJson").addEventListener("click", () => {
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    const dateStr = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}`;
+    const payload = {
+      _meta: {
+        school: (CFG.school || {}).name || "",
+        formNo: CFG.formNo || "",
+        exportedAt: now.toISOString(),
+        source: fbReady ? "Firebase Firestore（即時）" : "本機 DEMO",
+        count: SUBS.length
+      },
+      submissions: SUBS
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `石門國小_需求調查備份_${dateStr}.json`;
+    a.click(); URL.revokeObjectURL(a.href);
+  });
+
   $("#refreshBtn").addEventListener("click", load);
 
   // 監聽班級人數修改
