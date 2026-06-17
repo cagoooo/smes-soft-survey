@@ -483,4 +483,19 @@
       render();
     });
   }
+
+  // ── 回到頂部按鈕邏輯 ──
+  const scrollTopBtn = $("#scrollTopBtn");
+  if (scrollTopBtn) {
+    window.addEventListener("scroll", () => {
+      if (window.scrollY > 300) {
+        scrollTopBtn.classList.add("scroll-top-btn--show");
+      } else {
+        scrollTopBtn.classList.remove("scroll-top-btn--show");
+      }
+    });
+    scrollTopBtn.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
 })();
