@@ -70,8 +70,64 @@
       try { const cat = await (await fetch("data/catalog.json", { cache: "no-cache" })).json(); cat.forEach((c) => { SNTAGS[c.sn] = c.tags || []; }); } catch (e) { }
     }
     render();
+    loadState();
   }
   function readLocal() { try { return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); } catch (e) { return []; } }
+
+  // ── 前台填報開關（Firestore config/state；DEMO 退回 localStorage）──
+  const STATE_LS_KEY = "smes_survey_state";
+  const DEFAULT_CLOSED_MSG = "本次數位內容與教學軟體需求調查已截止，感謝全校老師踴躍填報！您仍可在下方查看目前的需求排行榜。";
+  let surveyState = { frozen: false, message: "", updatedAt: "" };
+  async function loadState() {
+    if (fbReady) {
+      try { const snap = await FS.getDoc(FS.doc(db, "config", "state")); surveyState = snap.exists() ? snap.data() : { frozen: false, message: "", updatedAt: "" }; }
+      catch (e) { surveyState = { frozen: false, message: "", updatedAt: "" }; }
+    } else {
+      try { surveyState = JSON.parse(localStorage.getItem(STATE_LS_KEY)) || { frozen: false, message: "", updatedAt: "" }; }
+      catch (e) { surveyState = { frozen: false, message: "", updatedAt: "" }; }
+    }
+    renderState();
+  }
+  function renderState() {
+    const wrap = $("#surveyStateCtl"); if (!wrap) return;
+    const frozen = !!surveyState.frozen;
+    const upd = surveyState.updatedAt ? fmtTime(surveyState.updatedAt) : "—";
+    const demoNote = fbReady ? "" : " · ⚠️ DEMO 模式（僅本機，正式站才會同步全校）";
+    wrap.innerHTML = `
+      <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between">
+        <div>
+          <span style="font-size:19px;font-weight:800;color:${frozen ? "#b91c1c" : "#0f766e"}">${frozen ? "🔴 已截止（老師無法送出）" : "🟢 開放填報中"}</span>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px">最後變更：${upd}${demoNote}</div>
+        </div>
+        <button id="stateToggleBtn" class="btn ${frozen ? "btn--ghost" : "btn--submit"}" type="button"
+          style="${frozen ? "" : "background:#b91c1c;border-color:#b91c1c"}">${frozen ? "▶️ 重新開放填報" : "⏸️ 切換為「已截止」"}</button>
+      </div>
+      <details style="margin-top:14px">
+        <summary style="cursor:pointer;font-size:14px;color:var(--muted)">✏️ 自訂截止公告文字（選填，最多 200 字）</summary>
+        <textarea id="stateMsg" maxlength="200" rows="2" style="width:100%;margin-top:8px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:14px" placeholder="${esc(DEFAULT_CLOSED_MSG)}">${esc(surveyState.message || "")}</textarea>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">老師端截止橫幅會顯示此文字（留空用預設）。切換狀態時一併儲存。</div>
+      </details>`;
+    $("#stateToggleBtn").addEventListener("click", toggleState);
+  }
+  async function toggleState() {
+    const next = !surveyState.frozen;
+    if (next && !confirm("確定切換為「已截止」？老師端會顯示截止橫幅、無法再送出填報（可隨時切回開放）。")) return;
+    const msgEl = $("#stateMsg");
+    const rec = {
+      frozen: next,
+      message: (msgEl && msgEl.value.trim()) ? msgEl.value.trim().slice(0, 200) : DEFAULT_CLOSED_MSG,
+      updatedAt: new Date().toISOString()
+    };
+    const btn = $("#stateToggleBtn"); if (btn) { btn.disabled = true; btn.textContent = "儲存中…"; }
+    try {
+      if (fbReady) { await FS.setDoc(FS.doc(db, "config", "state"), rec); }
+      else { localStorage.setItem(STATE_LS_KEY, JSON.stringify(rec)); }
+      surveyState = rec; renderState();
+    } catch (e) {
+      alert("切換失敗：" + (e && e.message ? e.message : e));
+      renderState();
+    }
+  }
 
   function getOfficialPicks(ranked) {
     try {

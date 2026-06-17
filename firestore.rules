@@ -10,6 +10,17 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // 前台填報開關（承辦人於後台手動切換「開放／已截止」）：
+    // 公開讀取（前台每次載入判斷是否已截止），寫入限定欄位形狀與長度。
+    match /config/{id} {
+      allow read: if true;
+      allow write: if request.resource.data.keys().hasOnly(['frozen','message','updatedAt'])
+        && request.resource.data.frozen is bool
+        && request.resource.data.message is string && request.resource.data.message.size() <= 200
+        && request.resource.data.updatedAt is string;
+      allow delete: if false;
+    }
+
     function isValidSubmission(d) {
       return d.keys().hasOnly(['name','role','classes','ts','tonggou','picks'])
         && d.name is string && d.name.size() > 0 && d.name.size() <= 30

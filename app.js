@@ -101,6 +101,31 @@
     } else { hint.textContent = ""; hint.style.color = ""; }
   }
 
+  /* ── 填報開關（後台手動切換「開放／已截止」，存 Firestore config/state）── */
+  let surveyFrozen = false;
+  const DEFAULT_CLOSED_MSG = "本次數位內容與教學軟體需求調查已截止，感謝全校老師踴躍填報！您仍可在下方查看目前的需求排行榜。";
+  async function loadSurveyState() {
+    if (!fbReady) return;
+    try {
+      const snap = await FS.getDoc(FS.doc(db, "config", "state"));
+      const d = snap.exists() ? snap.data() : null;
+      applyFrozenUI(!!(d && d.frozen), d && d.message);
+    } catch (e) { /* 讀不到狀態 → 視為開放，不影響填報 */ }
+  }
+  function applyFrozenUI(frozen, message) {
+    surveyFrozen = frozen;
+    const banner = $("#closedBanner");
+    if (banner) {
+      banner.hidden = !frozen;
+      if (frozen) $("#closedBannerMsg").textContent = message || DEFAULT_CLOSED_MSG;
+    }
+    const btn = $("#submitBtn");
+    if (btn) {
+      btn.disabled = frozen;
+      btn.textContent = frozen ? "📛 填報已截止" : "✅ 送出我的需求";
+    }
+  }
+
   /* ── Firebase（可選）── */
   let db = null, FS = null, fbReady = false;
   async function initFirebase() {
@@ -134,6 +159,7 @@
     startCountdown();
     bindEvents();
     await initFirebase();
+    await loadSurveyState();
     renderRank();
     renderSummary();
   }
@@ -353,6 +379,7 @@
       const el = sel && $(sel);
       if (el) { el.classList.add("needs-attention"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.classList.remove("needs-attention"), 1600); }
     };
+    if (surveyFrozen) { fail("本次需求調查已截止，感謝您的填報。如需異動請洽資訊組。", "#closedBanner"); return; }
     if (!name) { fail("請先填寫姓名（實名制）。", "#namebar"); $("#teacherName").focus(); return; }
     if (!role) { fail("請選擇職稱（導師／科任／行政）。", "#roleOpts"); return; }
     if (role === "導師" && myClasses.size !== 1) { fail("導師請點選 1 個帶班班級。", "#classPicker"); return; }
