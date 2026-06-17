@@ -116,6 +116,10 @@ if ("serviceWorker" in navigator) {
           });
         };
 
+        if (reg.waiting) {
+          _showSwUpdateToast(reg.waiting);
+        }
+
         if (reg.installing) _watchWorker(reg.installing);
 
         reg.addEventListener("updatefound", () => {
