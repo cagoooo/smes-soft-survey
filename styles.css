@@ -188,7 +188,7 @@ b{font-weight:700}
 .rank{list-style:none;margin:0;padding:0;counter-reset:r}
 .rank__row{display:flex;align-items:center;gap:12px;background:var(--card);
   border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:9px}
-.rank__no{width:34px;height:34px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;
+.rank__no{min-width:34px;width:auto;height:34px;padding:0 8px;flex-shrink:0;border-radius:17px;display:inline-flex;align-items:center;justify-content:center;gap:2px;
   font-weight:800;background:var(--rank-l);color:var(--rank)}
 .rank__row:nth-child(1) .rank__no{background:#fde68a;color:#92400e}
 .rank__row:nth-child(2) .rank__no{background:#e5e7eb;color:#374151}
