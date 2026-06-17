@@ -99,8 +99,7 @@
           <span style="font-size:19px;font-weight:800;color:${frozen ? "#b91c1c" : "#0f766e"}">${frozen ? "🔴 已截止（老師無法送出）" : "🟢 開放填報中"}</span>
           <div style="font-size:12px;color:var(--muted);margin-top:4px">最後變更：${upd}${demoNote}</div>
         </div>
-        <button id="stateToggleBtn" class="btn ${frozen ? "btn--ghost" : "btn--submit"}" type="button"
-          style="${frozen ? "" : "background:#b91c1c;border-color:#b91c1c"}">${frozen ? "▶️ 重新開放填報" : "⏸️ 切換為「已截止」"}</button>
+        <button id="stateToggleBtn" class="btn ${frozen ? "btn--primary" : "btn--danger"}" type="button">${frozen ? "▶️ 重新開放填報" : "⏸️ 切換為「已截止」"}</button>
       </div>
       <details style="margin-top:14px">
         <summary style="cursor:pointer;font-size:14px;color:var(--muted)">✏️ 自訂截止公告文字（選填，最多 200 字）</summary>

@@ -28,23 +28,26 @@
     <input id="gateInput" class="namebar__input" type="password" placeholder="管理密碼" />
     <button id="gateBtn" class="btn btn--submit" type="button" style="margin-top:12px">進入後台</button>
     <p id="gateMsg" class="submit-msg"></p>
-    <p class="gate__note">此為輕量防護（避免學生誤入）。資料屬實名制內部調查。</p>
+    <div style="margin-top: 16px; border-top: 1px solid var(--line); padding-top: 14px;">
+      <a href="index.html" class="btn btn--ghost" style="text-decoration:none; display:inline-block; width:100%">⬅️ 返回填報首頁</a>
+    </div>
+    <p class="gate__note" style="margin-top:12px">此為輕量防護（避免學生誤入）。資料屬實名制內部調查。</p>
   </div>
 </div>
 
-<main class="wrap" id="panel" hidden>
+<main class="wrap admin-panel" id="panel" hidden>
 
-  <div class="toolbar card" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between">
-    <span id="dataMode" class="toolbar__count"></span>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
+  <div class="toolbar card admin-toolbar">
+    <span id="dataMode" class="admin-toolbar__info"></span>
+    <div class="admin-toolbar__btns">
       <button id="refreshBtn" class="btn btn--ghost" type="button">🔄 重新整理</button>
-      <button id="copyOfficial" class="btn btn--submit" type="button" title="產生對應教育局 1667 線上表單的文字，一鍵複製後直接貼上">📋 複製官方填報文字</button>
+      <button id="copyOfficial" class="btn btn--primary" type="button" title="產生對應教育局 1667 線上表單的文字，一鍵複製後直接貼上">📋 複製官方填報文字</button>
       <button id="backupJson" class="btn btn--ghost" type="button" title="下載目前所有填報的完整 JSON 備份，存檔保險用">💾 完整備份 JSON</button>
       <button id="csvSoft" class="btn btn--ghost" type="button">⬇️ 軟體彙總 CSV</button>
       <button id="csvTeacher" class="btn btn--ghost" type="button">⬇️ 老師明細 CSV</button>
       <button id="csvOfficial" class="btn btn--ghost" type="button">📑 官方表單格式 CSV</button>
-      <a href="official.html" class="btn btn--ghost" style="text-decoration:none">🖨️ 核章 PDF（官方表格）</a>
-      <a href="report.html" class="btn btn--ghost" style="text-decoration:none">🖨️ 需求教師名單（備查 PDF）</a>
+      <a href="official.html" class="btn btn--ghost" style="text-decoration:none; display:inline-flex; align-items:center">🖨️ 核章 PDF（官方表格）</a>
+      <a href="report.html" class="btn btn--ghost" style="text-decoration:none; display:inline-flex; align-items:center">🖨️ 需求教師名單（備查 PDF）</a>
     </div>
   </div>
 
