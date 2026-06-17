@@ -7,7 +7,13 @@ const BUILD_VERSION = "__VER__";
 const CACHE = "smes-survey-" + BUILD_VERSION;
 
 self.addEventListener("install", () => {
-  self.skipWaiting();                       // 新版立即就緒
+  // 不呼叫 skipWaiting — 採用 prompt-to-refresh，不打斷正在使用的使用者
+});
+
+self.addEventListener("message", (e) => {
+  if (e.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener("activate", (e) => {
