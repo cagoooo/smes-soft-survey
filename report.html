@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>需求教師名單 · 備查附件｜石門國小數位軟體調查</title>
+<meta name="theme-color" content="#0f766e" />
+<link rel="icon" href="favicon.ico?v=__VER__" sizes="any" />
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=__VER__" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=__VER__" />
+<link rel="stylesheet" href="styles.css?v=__VER__" />
+<style>
+  /* 備查明細 A4 列印樣式 */
+  .rep-wrap{max-width:1000px;margin:0 auto;padding:20px 16px 60px}
+  .rep-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0;
+    background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
+  .rep-doc{background:#fff;border:1px solid var(--line);border-radius:8px;padding:28px 30px;
+    box-shadow:var(--shadow);color:#000}
+  .rep-doc h1{text-align:center;font-size:20px;margin:0 0 4px}
+  .rep-sub{text-align:center;font-size:13px;color:#444;margin:0 0 20px}
+  table.rep{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px}
+  table.rep th,table.rep td{border:1px solid #555;padding:8px 10px;text-align:center;vertical-align:middle}
+  table.rep th{background:#eef2f7}
+  table.rep td.l{text-align:left}
+  .rep-sign{display:flex;justify-content:space-between;margin-top:45px;font-size:13.5px}
+  .rep-sign div{text-align:center}
+  .rep-sign .line{margin-top:40px;border-top:1px solid #555;padding-top:4px;min-width:120px}
+  @media print{
+    .no-print{display:none !important}
+    body{background:#fff}
+    .rep-wrap{max-width:none;padding:0}
+    .rep-doc{border:none;box-shadow:none;padding:0}
+    @page{size:A4;margin:14mm}
+  }
+</style>
+</head>
+<body>
+<header class="hero no-print">
+  <div class="hero__inner">
+    <p class="hero__school">桃園市龍潭區石門國民小學 · 教務處</p>
+    <h1 class="hero__title" style="font-size:24px">🖨️ 需求教師名單 · 備查附件</h1>
+    <p class="hero__sub">僅列出有填報需求的同仁 · 供公文附件備查使用</p>
+  </div>
+</header>
+
+<!-- 密碼閘 -->
+<div id="gate" class="gate">
+  <div class="gate__box card">
+    <h2 class="gate__h">🔒 請輸入管理密碼</h2>
+    <input id="gateInput" class="namebar__input" type="password" placeholder="管理密碼" />
+    <button id="gateBtn" class="btn btn--submit" type="button" style="margin-top:12px">進入</button>
+    <p id="gateMsg" class="submit-msg"></p>
+  </div>
+</div>
+
+<div class="rep-wrap" id="panel" hidden>
+  <div class="rep-tools no-print">
+    <div style="display:flex;gap:8px;width:100%;margin-bottom:8px">
+      <a href="index.html" class="btn btn--ghost" style="text-decoration:none;font-size:13px;padding:6px 12px">⬅️ 回填報首頁</a>
+      <a href="admin.html" class="btn btn--ghost" style="text-decoration:none;font-size:13px;padding:6px 12px">📊 回管理後台</a>
+    </div>
+    <span id="repMode" class="toolbar__count"></span>
+    <button id="printBtn" class="btn btn--submit" type="button" style="width:auto;padding:12px 22px;margin-left:auto">🖨️ 列印 / 存成 PDF</button>
+    <button id="refreshBtn" class="btn btn--ghost" type="button">🔄 重新整理</button>
+  </div>
+  <div class="rep-doc" id="repDoc"><!-- JS render --></div>
+</div>
+
+<script src="data/config.js?v=__VER__"></script>
+<script src="report.js?v=__VER__"></script>
+<script src="sw-register.js?v=__VER__"></script>
+</body>
+</html>

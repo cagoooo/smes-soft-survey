@@ -10,8 +10,18 @@
   const LS_KEY = "smes_survey_v1";
   const AVG = CFG.avgClassSize || 25;
   const SIZES = CFG.classSizes || {};
+  const SIZES_LS_KEY = "smes_survey_class_sizes";
+  const PICKS_LS_KEY = "smes_survey_official_picks";
   const CLASSES = (CFG.classGroups || []).flatMap((g) => g.classes.map((c) => ({ id: g.grade + c, grade: g.grade, label: c })));
-  const classSize = (id) => (+SIZES[id] || AVG);
+  const classSize = (id) => {
+    try {
+      const localSizes = JSON.parse(localStorage.getItem(SIZES_LS_KEY) || "{}");
+      if (localSizes[id] != null && !isNaN(+localSizes[id])) {
+        return +localSizes[id];
+      }
+    } catch (e) {}
+    return (+SIZES[id] || AVG);
+  };
   const studentsOf = (set) => [...set].reduce((n, id) => n + classSize(id), 0);
   const ADMIN_CODE = "smes-survey-2026";
   try { document.documentElement.style.zoom = localStorage.getItem("smes_fontscale") || "1"; } catch (e) { }
@@ -73,9 +83,23 @@
       const o = soft[sn];
       return { sn, name: o.name, group: o.group, count: o.teachers.length, classes: o.classUnion.size, students: studentsOf(o.classUnion) };
     }).sort((a, b) => b.count - a.count || b.students - a.students);
+
+    // 取得手動勾選提報的 5 套軟體 SN
+    let officialPicks = [];
+    try {
+      officialPicks = JSON.parse(localStorage.getItem(PICKS_LS_KEY)) || [];
+    } catch (e) {}
+
+    // 如果沒有手動勾選，預設取前 5
+    if (!Array.isArray(officialPicks) || officialPicks.length === 0) {
+      officialPicks = ranked.slice(0, 5).map(r => r.sn);
+    }
+
+    const top5 = officialPicks.map((sn) => ranked.find(r => r.sn === sn)).filter(Boolean);
+
     return {
       aileadStu: studentsOf(buy.ailead), hanlinStu: studentsOf(buy.hanlin), classswiftTea: buy.classswift.length,
-      top5: ranked.slice(0, 5)
+      top5: top5
     };
   }
 

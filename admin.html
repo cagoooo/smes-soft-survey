@@ -14,6 +14,7 @@
 <body>
 <header class="hero">
   <div class="hero__inner">
+    <a href="index.html" class="btn btn--ghost no-print" style="position:absolute;top:16px;left:16px;z-index:10;background:rgba(255,255,255,0.15);color:#fff;border-color:transparent">⬅️ 回填報首頁</a>
     <p class="hero__school">桃園市龍潭區石門國民小學 · 教務處</p>
     <h1 class="hero__title" style="font-size:24px">📊 需求調查 · 管理後台</h1>
     <p class="hero__sub">完整填報名單與統計 · 僅供承辦人使用</p>
@@ -41,12 +42,25 @@
       <button id="csvTeacher" class="btn btn--ghost" type="button">⬇️ 老師明細 CSV</button>
       <button id="csvOfficial" class="btn btn--ghost" type="button">📑 官方表單格式 CSV</button>
       <a href="official.html" class="btn btn--ghost" style="text-decoration:none">🖨️ 核章 PDF（官方表格）</a>
+      <a href="report.html" class="btn btn--ghost" style="text-decoration:none">🖨️ 需求教師名單（備查 PDF）</a>
     </div>
   </div>
 
   <!-- 總覽 -->
   <section class="block">
     <div class="stat-grid" id="statGrid"></div>
+  </section>
+
+  <!-- 有需求之班級實際人數微調 -->
+  <section class="block" id="classSizesBlock" hidden>
+    <div class="block__head">
+      <span class="block__tag" style="background:#0f766e;color:#fff">學生精算</span>
+      <h2 class="block__title">🏫 有需求班級之實際人數微調</h2>
+      <p class="block__desc">僅列出目前有需求的班級。在此修改實際人數即可即時精算學生數（其餘班級預設以 25 人估算）。</p>
+    </div>
+    <div class="card" style="padding:20px 24px">
+      <div id="classSizesInputs" style="display:flex;gap:14px 28px;flex-wrap:wrap"></div>
+    </div>
   </section>
 
   <!-- 統購 -->

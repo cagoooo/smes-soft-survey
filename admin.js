@@ -14,7 +14,15 @@
   const CLASSES = (CFG.classGroups || []).flatMap((g) => g.classes.map((c) => ({ id: g.grade + c, grade: g.grade, label: c })));
   const clsLabel = (id) => { const c = CLASSES.find((x) => x.id === id); return c ? c.grade + c.label : id; };
   const SIZES = CFG.classSizes || {};
-  const classSize = (id) => (+SIZES[id] || AVG);                       // 各班實際人數，無則用平均
+  const classSize = (id) => {
+    try {
+      const localSizes = JSON.parse(localStorage.getItem(SIZES_LS_KEY) || "{}");
+      if (localSizes[id] != null && !isNaN(+localSizes[id])) {
+        return +localSizes[id];
+      }
+    } catch (e) {}
+    return (+SIZES[id] || AVG);
+  };
   const studentsOf = (set) => [...set].reduce((n, id) => n + classSize(id), 0);
   // 套用老師端設定的字級（同源 localStorage）
   try { document.documentElement.style.zoom = localStorage.getItem("smes_fontscale") || "1"; } catch (e) { }
@@ -29,6 +37,8 @@
   ];
 
   let db = null, FS = null, fbReady = false, SUBS = [], SNTAGS = {};
+  const SIZES_LS_KEY = "smes_survey_class_sizes";
+  const PICKS_LS_KEY = "smes_survey_official_picks";
 
   $("#gateBtn").addEventListener("click", tryEnter);
   $("#gateInput").addEventListener("keydown", (e) => { if (e.key === "Enter") tryEnter(); });
@@ -63,6 +73,18 @@
   }
   function readLocal() { try { return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); } catch (e) { return []; } }
 
+  function getOfficialPicks(ranked) {
+    try {
+      const picks = JSON.parse(localStorage.getItem(PICKS_LS_KEY));
+      if (Array.isArray(picks)) {
+        return picks.filter(sn => ranked.some(r => r.sn === sn));
+      }
+    } catch (e) {}
+    const defaultPicks = (ranked || []).slice(0, 5).map(r => r.sn);
+    try { localStorage.setItem(PICKS_LS_KEY, JSON.stringify(defaultPicks)); } catch (e) {}
+    return defaultPicks;
+  }
+
   // ── 彙總（班級用聯集去重）──
   function aggregate() {
     // 統購
@@ -95,7 +117,7 @@
     const byGrade = {};
     (CFG.classGroups || []).forEach((g) => byGrade[g.grade] = 0);
     demandClasses.forEach((id) => { const c = CLASSES.find((x) => x.id === id); if (c) byGrade[c.grade] = (byGrade[c.grade] || 0) + 1; });
-    return { buy, ranked, byGroup, byDomain, byGrade, byDay };
+    return { buy, ranked, byGroup, byDomain, byGrade, byDay, soft };
   }
 
   /* ── 圖表（純 CSS/SVG）── */
@@ -149,12 +171,51 @@
         <div style="font-size:12px;color:var(--muted);margin:-2px 0 8px">需求老師：${b.teachers.map(esc).join("、") || "—"}</div>`;
     }).join("");
 
+    // 渲染有需求班級人數微調區
+    const classSizesBlock = $("#classSizesBlock");
+    const classSizesInputs = $("#classSizesInputs");
+    if (classSizesBlock && classSizesInputs) {
+      const activeClasses = [];
+      Object.keys(buy).forEach(k => {
+        if (buy[k].classUnion) [...buy[k].classUnion].forEach(c => activeClasses.push(c));
+      });
+      ranked.forEach(r => {
+        const item = soft[r.sn];
+        if (item && item.classUnion) [...item.classUnion].forEach(c => activeClasses.push(c));
+      });
+      const uniqueActiveClasses = [...new Set(activeClasses)].sort((a, b) => a.localeCompare(b));
+      
+      if (uniqueActiveClasses.length > 0) {
+        classSizesBlock.hidden = false;
+        try {
+          const localSizes = JSON.parse(localStorage.getItem(SIZES_LS_KEY) || "{}");
+          classSizesInputs.innerHTML = uniqueActiveClasses.map((id) => {
+            const currentVal = localSizes[id] != null ? localSizes[id] : (SIZES[id] || "");
+            return `<div style="display:flex;align-items:center;gap:6px;font-size:14px;background:var(--card-bg);border:1px solid var(--line);padding:6px 12px;border-radius:8px">
+              <span style="font-weight:bold">${esc(clsLabel(id))}：</span>
+              <input type="number" class="class-size-input" data-cid="${esc(id)}" value="${currentVal}" placeholder="預設 25" style="width:70px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;font-size:14px" min="0" /> 人
+            </div>`;
+          }).join("");
+        } catch (e) {
+          classSizesInputs.innerHTML = "<p style='color:var(--warn)'>載入班級人數設定失敗</p>";
+        }
+      } else {
+        classSizesBlock.hidden = true;
+      }
+    }
+
+    const officialPicks = getOfficialPicks(ranked);
+
     // 自主排行
     $("#rankFull").innerHTML = ranked.length ? ranked.map((r, i) => {
-      const top5 = i < 5;
-      return `<details class="adm-rank ${top5 ? "adm-rank--top" : ""}">
+      const isPicked = officialPicks.includes(r.sn);
+      return `<details class="adm-rank ${isPicked ? "adm-rank--top" : ""}">
         <summary>
-          <span class="rank__no">${top5 ? "🏅" : ""}${i + 1}</span>
+          <label style="display:inline-flex;align-items:center;gap:6px;margin-right:8px" class="no-print" onclick="event.stopPropagation()">
+            <input type="checkbox" class="rank-pick-cb" data-sn="${esc(r.sn)}" ${isPicked ? "checked" : ""} style="cursor:pointer" />
+            <span style="font-size:12px;color:var(--muted);user-select:none;cursor:pointer">提報</span>
+          </label>
+          <span class="rank__no">${isPicked ? "🏅" : ""}#${i + 1}</span>
           <span class="rank__name">${esc(r.name)}${r.sn === "11112-045" ? " ⭐" : ""}
             <span class="gtag gtag-${r.group}">${GROUP[r.group] || ""}</span></span>
           <span class="rank__cnt">教師 ${r.count}｜班級 ${r.classes}｜學生 ${r.students}</span>
@@ -213,6 +274,7 @@
   // 官方表單格式（對應教育局調查表欄位，可直接貼入）
   $("#csvOfficial").addEventListener("click", () => {
     const { buy, ranked } = aggregate();
+    const officialPicks = getOfficialPicks(ranked);
     const sUnit = (k) => studentsOf(buy[k].classUnion);
     const rows = [];
     rows.push(["桃園市115年數位內容與教學軟體需求調查表 — 系統彙整"]);
@@ -226,10 +288,63 @@
     rows.push([]);
     rows.push(["二、各校自主需求軟體（依需求高低取前 5 名）"]);
     rows.push(["排序", "教育部公告產品序號", "組別(1數位內容/2課堂教學/3遠距)", "品項名稱", "班級數", "教師數", "學生數"]);
-    ranked.slice(0, 5).forEach((r, i) => rows.push([i + 1, r.sn, r.group, r.name, r.classes, r.count, r.students]));
-    if (!ranked.length) rows.push(["（尚無自主需求填報）"]);
+    
+    const pickedItems = officialPicks.map((sn) => ranked.find(r => r.sn === sn)).filter(Boolean);
+    pickedItems.forEach((r, i) => rows.push([i + 1, r.sn, r.group, r.name, r.classes, r.count, r.students]));
+    
+    if (!pickedItems.length) rows.push(["（尚無自主需求填報）"]);
     dl("石門國小_教育局官方表單格式.csv", rows);
   });
 
   $("#refreshBtn").addEventListener("click", load);
+
+  // 監聽班級人數修改
+  const classSizesInputs = $("#classSizesInputs");
+  if (classSizesInputs) {
+    classSizesInputs.addEventListener("change", (e) => {
+      const input = e.target.closest(".class-size-input");
+      if (!input) return;
+      const cid = input.dataset.cid;
+      const val = input.value.trim();
+      try {
+        const localSizes = JSON.parse(localStorage.getItem(SIZES_LS_KEY) || "{}");
+        if (val === "" || isNaN(+val) || +val < 0) {
+          delete localSizes[cid];
+        } else {
+          localSizes[cid] = +val;
+        }
+        localStorage.setItem(SIZES_LS_KEY, JSON.stringify(localSizes));
+        render();
+      } catch (err) { console.error(err); }
+    });
+  }
+
+  // 監聽排行榜勾選
+  const rankFull = $("#rankFull");
+  if (rankFull) {
+    rankFull.addEventListener("change", (e) => {
+      const cb = e.target.closest(".rank-pick-cb");
+      if (!cb) return;
+      const sn = cb.dataset.sn;
+      const checked = cb.checked;
+      
+      const agg = aggregate();
+      let picks = getOfficialPicks(agg.ranked);
+      
+      if (checked) {
+        if (picks.length >= 5) {
+          alert("自主軟體至多只能提報 5 項！請先取消其他軟體。");
+          cb.checked = false;
+          return;
+        }
+        if (!picks.includes(sn)) picks.push(sn);
+      } else {
+        picks = picks.filter(x => x !== sn);
+      }
+      try {
+        localStorage.setItem(PICKS_LS_KEY, JSON.stringify(picks));
+      } catch (err) {}
+      render();
+    });
+  }
 })();
