@@ -150,7 +150,7 @@
 
   function render() {
     const agg = aggregate();
-    const { buy, ranked } = agg;
+    const { buy, ranked, soft } = agg;
     renderCharts(agg);
 
     const picksTotal = SUBS.reduce((n, s) => n + (s.picks ? s.picks.length : 0), 0);
