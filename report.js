@@ -90,21 +90,23 @@
       <h1>桃園市115年「中小學數位學習實施計畫」數位內容與教學軟體<br>提報需求教師名單（備查）</h1>
       <p class="rep-sub">學校名稱：${esc(sc.name || "桃園市龍潭區石門國民小學")} ｜ 線上填報編號：1667 ｜ 總計：${demandTeachers.length} 位有需求同仁</p>
 
-      <table class="rep">
-        <thead>
-          <tr>
-            <th style="width:50px">序號</th>
-            <th style="width:90px">教師姓名</th>
-            <th style="width:90px">職稱</th>
-            <th style="width:180px">任教班級</th>
-            <th style="width:200px">統購軟體需求</th>
-            <th>自主需求軟體（勾選品項）</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${tableRows}
-        </tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="rep">
+          <thead>
+            <tr>
+              <th style="width:5%">序號</th>
+              <th style="width:10%">教師姓名</th>
+              <th style="width:10%">職稱</th>
+              <th style="width:18%">任教班級</th>
+              <th style="width:18%">統購軟體需求</th>
+              <th style="width:39%">自主需求軟體（勾選品項）</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+      </div>
 
       <p style="font-size:11px;color:#555;margin-top:10px" class="no-print">說明：本表僅篩選「有勾選需求」的教師名單，未提出需求的老師不列入本備查附件中。</p>
 
