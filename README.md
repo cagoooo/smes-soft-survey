@@ -46,7 +46,7 @@ python -m http.server 8766
 - 教育局公文.pdf／需求調查表.xlsx／115年度校園數位內容與教學軟體需求調查參考清冊.ods
 
 ---
-Made with ❤️ by [阿凱老師](https://www.smes.tyc.edu.tw/modules/tadnews/page.php?ncsn=11&nsn=16#a5)
+Made with ❤️ by [阿凱老師](https://www.smes.tyc.edu.tw/modules/school/index.php?department_id=2&zone_id=0&page_id=2&content_id=11&type=news&from_op=all_news#a5)
 
 ---
 
