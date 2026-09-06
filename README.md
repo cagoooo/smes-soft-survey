@@ -1,5 +1,7 @@
 # 石門國小 · 數位內容與教學軟體需求調查填報網站
 
+🌐 **線上使用：[數位內容與教學軟體需求調查填報](https://cagoooo.github.io/smes-soft-survey/)**
+
 桃園市龍潭區石門國民小學 — 115 年「中小學數位學習實施計畫」教師軟體需求調查。
 依據：桃教資字第1150051445號 · 教育局線上填報編號 **1667** · 教育局截止 **6/25（四）17:00**。
 
@@ -59,7 +61,7 @@ Made with ❤️ by [阿凱老師](https://www.smes.tyc.edu.tw/modules/school/in
 - Repository：`cagoooo/smes-soft-survey`
 - 可見性：公開
 - 主要技術：JavaScript、Firebase
-- 線上入口：未在 GitHub repository metadata 設定
+- 線上入口：<https://cagoooo.github.io/smes-soft-survey/>
 
 ### 可以怎麼應用
 
