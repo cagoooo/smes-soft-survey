@@ -4,7 +4,9 @@
         離線時才用快取當後備）。版本號由部署時注入，每次更新即換新。
    ============================================================ */
 const BUILD_VERSION = "__VER__";
-const CACHE = "smes-survey-" + BUILD_VERSION;
+// 同一網域（cagoooo.github.io）的所有工具共用快取空間，只能清除自己這個前綴的快取
+const CACHE_PREFIX = "smes-survey-";
+const CACHE = CACHE_PREFIX + BUILD_VERSION;
 
 self.addEventListener("install", () => {
   // 不呼叫 skipWaiting — 採用 prompt-to-refresh，不打斷正在使用的使用者
@@ -19,7 +21,7 @@ self.addEventListener("message", (e) => {
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith(CACHE_PREFIX) && k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())      // 立刻接管所有頁面
   );
 });
